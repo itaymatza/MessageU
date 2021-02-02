@@ -21,8 +21,8 @@ bool is_number(const std::string& s)
 
 /**
 	Reads server's IP address and TCP port number from ./server.info file.
-	If invalid file or port number - output stream for errors and exit.
-	@return tuple of IP address and TCP port number.
+	If invalid info file format or port number - output stream for errors and exit.
+	Writes the info to ip and port string parameters.
 */
 void getServerInfo(string* ip, string* port){
 
