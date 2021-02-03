@@ -10,6 +10,6 @@
 constexpr int CHUNK_SIZE = 1024;
 
 void getServerInfo(std::string* ip_address, std::string* port_number);
-
+void getClientInfo(string* clien_name, std::vector<unsigned char>* uid);
 
 #endif /* __DATA_HELPER_H__ */
