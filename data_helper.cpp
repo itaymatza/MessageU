@@ -75,23 +75,16 @@ std::vector<unsigned char> parse_string(const std::string& s)
 	If invalid info file format - output stream for errors and exit.
 	Writes the info to n and port string parameters.
 */
-void getClientInfo(string* clien_name, std::vector<unsigned char>* uid) {
+void getClientInfo(string* clien_name, std::vector<unsigned char>* uuid) {
 
-	ifstream file("server.info");
+	ifstream file("me.info");
 	if (file) {
-		string info, is_end_of_file;
+		string first_name, last_name, uid, is_end_of_file;
 
-		file >> info >> is_end_of_file;
-		int position = info.find(":");
-		*ip = info.substr(0, position);
-		position += 1;
-		*port = info.substr(position);
+		file >> first_name >> last_name >> uid >> is_end_of_file;
+		*clien_name = first_name + " " + last_name;
+		*uuid = parse_string(uid);
 
-		int port_int = atoi((*port).c_str());
-		if (!is_number(*port) || !is_end_of_file.empty() || port_int < 1 || port_int > 65535) {
-			cerr << "Error: invalid file, the file should contain just valid port number.\n";
-			exit(-1);
-		}
 		file.close();
 	}
 	else {
