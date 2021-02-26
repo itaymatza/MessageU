@@ -10,7 +10,7 @@
 #include "data_helper.h"
 
 using namespace std;
-constexpr int SRV_VERSION = 2;
+constexpr int CLIENT_VERSION = 2;
 string welcome_msg("MessageU client at your service.");
 string error_msg("server responded with an error.");
 
@@ -54,6 +54,9 @@ int main() {
 			cout << "Option 1" << endl;
 			if (isFileExist("me.info")) {
 				cout << "me.info file is already exists." << endl << "\n";
+			}
+			else {
+				cout << "Please enter new user name." << endl;
 			}
 			break;
 		case 2:
