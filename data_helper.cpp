@@ -25,7 +25,7 @@ bool is_number(const std::string& s)
 	If invalid info file format or port number - output stream for errors and exit.
 	Writes the info to ip and port string parameters.
 */
-void getServerInfo(string* ip, string* port){
+void getServerInfo(string* ip, string* port, Status* status){
 
 	ifstream file("server.info");
 	if (file) {
@@ -40,13 +40,13 @@ void getServerInfo(string* ip, string* port){
 		int port_int = atoi((*port).c_str());
 		if (!is_number(*port) || !is_end_of_file.empty() || port_int < 1 || port_int > 65535) {
 			cerr << "Error: invalid file, the file should contain just valid port number.\n";
-			exit(-1);
+			*status = server_info_error;
 		}
 		file.close();
 	}
 	else {
 		cerr << "Error: Unable to open server.info file.\n";
-		exit(-1);
+		*status = server_info_error;
 	}
 }
 
@@ -75,7 +75,7 @@ std::vector<unsigned char> parse_string(const std::string& s)
 	If invalid info file format - output stream for errors and exit.
 	Writes the info to n and port string parameters.
 */
-void getClientInfo(string* clien_name, std::vector<unsigned char>* uuid) {
+void getClientInfo(string* clien_name, std::vector<unsigned char>* uuid, Status* status) {
 
 	ifstream file("me.info");
 	if (file) {
@@ -89,6 +89,17 @@ void getClientInfo(string* clien_name, std::vector<unsigned char>* uuid) {
 	}
 	else {
 		cerr << "Error: Unable to open server.info file.\n";
-		exit(-1);
+		*status = client_info_error;
+	}
+}
+
+bool isFileExist(string filename) {
+	FILE* file;
+	if (!fopen_s(&file, filename.c_str(), "rb") && file != NULL) {
+		fclose(file);
+		return true;
+	}
+	else {
+		return false;
 	}
 }

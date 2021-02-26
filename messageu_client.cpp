@@ -12,20 +12,22 @@
 using namespace std;
 constexpr int SRV_VERSION = 2;
 string welcome_msg("MessageU client at your service.");
+string error_msg("server responded with an error.");
 
 // MessageU-Client Main Function.
 int main() {
+	Status status = proper;
 	string* ip = new string();
 	string* port = new string();
 	string* clien_name = new string();
 	vector<unsigned char>* uid = new vector<unsigned char>();
 
-	getServerInfo(ip, port);
-	getClientInfo(clien_name, uid);
+	getServerInfo(ip, port, &status);
+	getClientInfo(clien_name, uid, &status);
 	cout << *clien_name;
 
-	bool get_input = true;
-	while (get_input) {
+	bool another_request = true;
+	while (another_request) {
 		int option;
 
 		cout << welcome_msg << endl << "\n";
@@ -50,6 +52,9 @@ int main() {
 		switch (option) {
 		case 1:
 			cout << "Option 1" << endl;
+			if (isFileExist("me.info")) {
+				cout << "me.info file is already exists." << endl << "\n";
+			}
 			break;
 		case 2:
 			cout << "Option 2" << endl;
@@ -73,7 +78,7 @@ int main() {
 			cout << "Option 52" << endl;
 			break;
 		case 0:
-			get_input = false;
+			another_request = false;
 			break;
 		default:
 			cout << "Invalid input. \nEnter again - ";
@@ -85,4 +90,3 @@ int main() {
 	delete ip;
 	delete port;
 }
-

@@ -10,8 +10,11 @@
 #define __DATA_HELPER_H__
 
 constexpr int CHUNK_SIZE = 1024;
+enum Status { server_info_error = -10, client_info_error, proper = 0 };
 
-void getServerInfo(std::string* ip_address, std::string* port_number);
-void getClientInfo(std::string* clien_name, std::vector<unsigned char>* uid);
+void getServerInfo(std::string* ip_address, std::string* port_number, Status* status);
+void getClientInfo(std::string* clien_name, std::vector<unsigned char>* uid, Status* status);
+bool isFileExist(std::string filename);
+
 
 #endif /* __DATA_HELPER_H__ */
