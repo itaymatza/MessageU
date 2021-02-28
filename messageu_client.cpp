@@ -8,15 +8,16 @@
 */
 #include <iostream>
 #include "data_helper.h"
+#include "protocol_request.h"
 
 using namespace std;
-constexpr int CLIENT_VERSION = 2;
+using boost::asio::ip::tcp;
 string welcome_msg("MessageU client at your service.");
 string error_msg("server responded with an error.");
 
 // MessageU-Client Main Function.
 int main() {
-	Status status = proper;
+	Status status = Status::proper;
 	string* ip = new string();
 	string* port = new string();
 	string* clien_name = new string();
@@ -24,7 +25,11 @@ int main() {
 
 	getServerInfo(ip, port, &status);
 	getClientInfo(clien_name, uid, &status);
-	cout << *clien_name;
+
+	boost::asio::io_context io_context;
+	tcp::socket sock(io_context);
+	tcp::resolver resolver(io_context);
+	boost::asio::connect(sock, resolver.resolve(*ip, *port));
 
 	bool another_request = true;
 	while (another_request) {
@@ -56,7 +61,17 @@ int main() {
 				cout << "me.info file is already exists." << endl << "\n";
 			}
 			else {
-				cout << "Please enter new user name." << endl;
+				string username;
+				RegisterRequest* request;
+
+				while (username.empty()) {
+					cout << "Please enter new user name: ";
+					cin >> username;
+				}
+				request = encodeRegisterRequest(username);
+				uint8_t* buffer = reinterpret_cast<uint8_t*>(request);
+				writeToServer(sock, buffer, sizeof(request));
+				delete request;
 			}
 			break;
 		case 2:

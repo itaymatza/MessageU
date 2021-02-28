@@ -12,6 +12,10 @@
 #include <iostream>
 #include <boost/asio.hpp>
 
+constexpr int CHUNK_SIZE = 1024;
+constexpr int USERNAME_LEN = 255;
+constexpr int CLIENT_VERSION = 2;
+
 
 // Supported request operation codes.
 enum RequestCode : uint8_t {
@@ -22,25 +26,33 @@ enum RequestCode : uint8_t {
 	PULL_MESSAGE_REQUEST = 104
 };
 
-
 // Basic request header struct.
 #pragma pack(push, 1)
 struct RequestHeader
 {
-	uint32_t uid;
+	uint8_t uid[16];
 	uint8_t version;
-	uint8_t op;
-	uint16_t name_len;
+	uint8_t code;
+	uint32_t payoad_size;
 };
 #pragma pack(pop)
 
-// Basic request payload struct.
+// Register request payload struct.
 #pragma pack(push, 1)
-struct RequestPayload
+struct RegisterRequestPayload
 {
-	uint32_t size;
+	uint8_t name[USERNAME_LEN];
+	uint8_t public_key[160];
 };
 #pragma pack(pop)
 
+struct RegisterRequest {
+	RequestHeader header;
+	RegisterRequestPayload payload;
+};
+
+
+RegisterRequest* encodeRegisterRequest(std::string username);
+void writeToServer(boost::asio::ip::tcp::socket& sock, uint8_t* request, unsigned long request_length);
 
 #endif /* __PROTOCOL_REQUEST_H__ */

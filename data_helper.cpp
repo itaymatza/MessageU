@@ -32,7 +32,7 @@ void getServerInfo(string* ip, string* port, Status* status){
 		string info, is_end_of_file;
 
 		file >> info >> is_end_of_file;
-		int position = info.find(":");
+		size_t position = info.find(":");
 		*ip = info.substr(0, position);
 		position += 1;
 		*port = info.substr(position);
@@ -40,13 +40,13 @@ void getServerInfo(string* ip, string* port, Status* status){
 		int port_int = atoi((*port).c_str());
 		if (!is_number(*port) || !is_end_of_file.empty() || port_int < 1 || port_int > 65535) {
 			cerr << "Error: invalid file, the file should contain just valid port number.\n";
-			*status = server_info_error;
+			*status = Status::server_info_error;
 		}
 		file.close();
 	}
 	else {
 		cerr << "Error: Unable to open server.info file.\n";
-		*status = server_info_error;
+		*status = Status::server_info_error;
 	}
 }
 
@@ -88,8 +88,8 @@ void getClientInfo(string* clien_name, std::vector<unsigned char>* uuid, Status*
 		file.close();
 	}
 	else {
-		cerr << "Error: Unable to open server.info file.\n";
-		*status = client_info_error;
+		cerr << "Error: Unable to open me.info file.\n";
+		*status = Status::client_info_error;
 	}
 }
 
