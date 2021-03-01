@@ -26,7 +26,7 @@ enum RequestCode : uint8_t {
 	PULL_MESSAGE_REQUEST = 104
 };
 
-// Basic request header struct.
+// Request header struct.
 #pragma pack(push, 1)
 struct RequestHeader
 {
@@ -47,7 +47,8 @@ struct RegisterRequestPayload
 #pragma pack(pop)
 
 #pragma pack(push, 1)
-struct RegisterRequest {
+struct RegisterRequest 
+{
 	RequestHeader header;
 	RegisterRequestPayload payload;
 };

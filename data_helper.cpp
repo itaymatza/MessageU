@@ -58,7 +58,7 @@ unsigned char parse_hex(char c)
 	std::abort();
 }
 
-std::vector<unsigned char> parse_string(const std::string& s)
+std::vector<unsigned char> parse_uuid_string(const std::string& s)
 {
 	if (s.size() % 2 != 0) std::abort();
 	std::vector<unsigned char> result(s.size() / 2);
@@ -83,7 +83,7 @@ void getClientInfo(string* clien_name, std::vector<unsigned char>* uuid, Status*
 
 		file >> first_name >> last_name >> uid >> is_end_of_file;
 		*clien_name = first_name + " " + last_name;
-		*uuid = parse_string(uid);
+		*uuid = parse_uuid_string(uid);
 
 		file.close();
 	}
@@ -101,5 +101,24 @@ bool isFileExist(string filename) {
 	}
 	else {
 		return false;
+	}
+}
+
+void writeMeInfoFile(std::string username, uint8_t uid[16], Status* status) {
+	ofstream file("me.info");
+	if (file) {
+		char buffer[3];
+
+		file << username << endl;
+		for (int j = 0; j < 16; j++) {
+			sprintf_s((&buffer)[0], "%02X", uid[j]);
+			file << buffer;
+		}
+		file << endl;
+		file.close();
+	}
+	else {
+		cerr << "Error: Unable to open and write me.info file.\n";
+		*status = Status::client_info_error;
 	}
 }

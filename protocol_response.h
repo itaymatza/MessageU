@@ -24,26 +24,33 @@ enum ResponseCode : uint16_t {
 	GENERAL_ERROR = 9000
 };
 
-// Basic request header struct.
-#pragma pack(push, 1)
-struct RequestHeader
-{
-	uint32_t uid;
-	uint8_t version;
-	uint8_t op;
-	uint16_t name_len;
-};
-#pragma pack(pop)
-
-
-// Basic response header struct.
+// Response header struct.
 #pragma pack(push, 1)
 struct ResponseHeader
 {
 	uint8_t version;
-	uint16_t status;
+	uint16_t code;
+	uint32_t payoad_size;
 };
 #pragma pack(pop)
+
+// Register response payload struct.
+#pragma pack(push, 1)
+struct RegisterResponsePayload
+{
+	uint8_t uid[16];
+};
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+struct RegisterResponse 
+{
+	ResponseHeader header;
+	RegisterResponsePayload payload;
+};
+#pragma pack(pop)
+
+RegisterResponse* readServerResponse(boost::asio::ip::tcp::socket& sock);
 
 
 #endif /* __PROTOCOL_RESPNSE_H__ */

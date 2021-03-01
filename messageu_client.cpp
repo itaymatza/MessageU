@@ -9,6 +9,7 @@
 #include <iostream>
 #include "data_helper.h"
 #include "protocol_request.h"
+#include "protocol_response.h"
 
 using namespace std;
 using boost::asio::ip::tcp;
@@ -66,14 +67,16 @@ int main() {
 			else {
 				string username;
 				RegisterRequest* request;
+				RegisterResponse* response;
 
 				while (username.empty()) {
 					cout << "Please enter new user name: ";
 					getline(cin, username);
 				}
 				request = encodeRegisterRequest(username);
-				uint8_t* buffer = reinterpret_cast<uint8_t*>(request);
-				writeToServer(sock, buffer, sizeof(RegisterRequest));
+				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(RegisterRequest));
+				response = readServerResponse(sock);
+				writeMeInfoFile(username, response->payload.uid, &status);
 				delete request;
 			}
 			break;
