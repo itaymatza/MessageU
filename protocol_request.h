@@ -46,6 +46,7 @@ struct RegisterRequestPayload
 };
 #pragma pack(pop)
 
+// Register request struct.
 #pragma pack(push, 1)
 struct RegisterRequest 
 {
@@ -54,7 +55,23 @@ struct RegisterRequest
 };
 #pragma pack(pop)
 
+// Clients list request struct.
+#pragma pack(push, 1)
+struct ClientsListRequest
+{
+	RequestHeader header;
+};
+#pragma pack(pop)
+
+
 RegisterRequest* encodeRegisterRequest(std::string username);
+ClientsListRequest* encodeClientsListRequest(uint8_t uid[16]);
 void writeToServer(boost::asio::ip::tcp::socket& sock, uint8_t* request, unsigned long request_length);
+
+
+
+
+
+
 
 #endif /* __PROTOCOL_REQUEST_H__ */

@@ -61,7 +61,7 @@ unsigned char parse_hex(char c)
 void HexStringTocharArray(string str, uint8_t* uid) {
 	size_t length = str.length() / 2;
 
-	for (int i = 0, j = 0; i < length; i++) {
+	for (size_t i = 0, j = 0; i < length; i++) {
 		uid[i] = 16 * parse_hex(str[2 * i]) + parse_hex(str[2 * i + 1]);
 	}
 }

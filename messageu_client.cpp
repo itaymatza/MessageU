@@ -33,8 +33,6 @@ int main() {
 	tcp::resolver resolver(io_context);
 	boost::asio::connect(sock, resolver.resolve(*ip, *port));
 
-	cout << uid << endl;
-
 	bool another_request = true;
 	while (another_request) {
 		string input;
@@ -81,10 +79,15 @@ int main() {
 				response = readServerResponse(sock);
 				writeMeInfoFile(username, response->payload.uid, &status);
 				delete request;
+				delete response;
 			}
 			break;
 		case 2:
 			cout << "Option 2" << endl;
+			ClientsListRequest* request;
+			request = encodeClientsListRequest(uid);
+			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(ClientsListRequest));
+
 			break;
 		case 3:
 			cout << "Option 3" << endl;
