@@ -16,14 +16,14 @@ using boost::asio::ip::tcp;
 string welcome_msg("MessageU client at your service.");
 string error_msg("server responded with an error.");
 
+
 // MessageU-Client Main Function.
 int main() {
-
 	Status status = Status::proper;
 	string* ip = new string();
 	string* port = new string();
 	string* clien_name = new string();
-	vector<unsigned char>* uid = new vector<unsigned char>();
+	uint8_t uid[16];
 
 	getServerInfo(ip, port, &status);
 	getClientInfo(clien_name, uid, &status);
@@ -32,6 +32,8 @@ int main() {
 	tcp::socket sock(io_context);
 	tcp::resolver resolver(io_context);
 	boost::asio::connect(sock, resolver.resolve(*ip, *port));
+
+	cout << uid << endl;
 
 	bool another_request = true;
 	while (another_request) {
@@ -56,7 +58,6 @@ int main() {
 		{
 			cout << "Invalid input. \nEnter again - ";
 			cin.clear();
-			//cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			continue;
 		}
 

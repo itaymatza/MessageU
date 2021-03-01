@@ -58,15 +58,12 @@ unsigned char parse_hex(char c)
 	std::abort();
 }
 
-std::vector<unsigned char> parse_uuid_string(const std::string& s)
-{
-	if (s.size() % 2 != 0) std::abort();
-	std::vector<unsigned char> result(s.size() / 2);
+void HexStringTocharArray(string str, uint8_t* uid) {
+	size_t length = str.length() / 2;
 
-	for (std::size_t i = 0; i != s.size() / 2; ++i)
-		result[i] = 16 * parse_hex(s[2 * i]) + parse_hex(s[2 * i + 1]);
-
-	return result;
+	for (int i = 0, j = 0; i < length; i++) {
+		uid[i] = 16 * parse_hex(str[2 * i]) + parse_hex(str[2 * i + 1]);
+	}
 }
 
 
@@ -75,16 +72,20 @@ std::vector<unsigned char> parse_uuid_string(const std::string& s)
 	If invalid info file format - output stream for errors and exit.
 	Writes the info to n and port string parameters.
 */
-void getClientInfo(string* clien_name, std::vector<unsigned char>* uuid, Status* status) {
+void getClientInfo(string* clien_name, uint8_t* uid, Status* status) {
 
 	ifstream file("me.info");
 	if (file) {
-		string first_name, last_name, uid, is_end_of_file;
+		string name, uidstring, is_end_of_file;
+		getline(file, name);
+		getline(file, uidstring);
+		if (getline(file, is_end_of_file)) {
+			cerr << "Error: Illegal me.info file.\n";
+			*status = Status::client_info_error;
+		}
 
-		file >> first_name >> last_name >> uid >> is_end_of_file;
-		*clien_name = first_name + " " + last_name;
-		*uuid = parse_uuid_string(uid);
-
+		*clien_name = name;
+		HexStringTocharArray(uidstring, uid);
 		file.close();
 	}
 	else {
