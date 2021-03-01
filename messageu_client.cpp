@@ -17,6 +17,7 @@ string error_msg("server responded with an error.");
 
 // MessageU-Client Main Function.
 int main() {
+
 	Status status = Status::proper;
 	string* ip = new string();
 	string* port = new string();
@@ -33,6 +34,7 @@ int main() {
 
 	bool another_request = true;
 	while (another_request) {
+		string input;
 		int option;
 
 		cout << welcome_msg << endl << "\n";
@@ -45,7 +47,8 @@ int main() {
 		cout << "51) Send a request for symmetric key" << endl;
 		cout << "52) Send your symmetric key" << endl;
 		cout << "0) Exit client" << endl;
-		cin >> option;
+		getline(cin, input);
+		option = stoi(input);
 
 		if (!cin) {
 			cout << "Invalid input. \nEnter again - ";
@@ -66,11 +69,11 @@ int main() {
 
 				while (username.empty()) {
 					cout << "Please enter new user name: ";
-					cin >> username;
+					getline(cin, username);
 				}
 				request = encodeRegisterRequest(username);
 				uint8_t* buffer = reinterpret_cast<uint8_t*>(request);
-				writeToServer(sock, buffer, sizeof(request));
+				writeToServer(sock, buffer, sizeof(RegisterRequest));
 				delete request;
 			}
 			break;
