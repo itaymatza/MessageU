@@ -104,17 +104,24 @@ bool isFileExist(string filename) {
 	}
 }
 
+string charArrayToHexString(uint8_t ch[]) {
+	string out;
+	size_t length = sizeof(ch) * 2;
+
+	for (int i = 0; i < length; i++) {
+		char buffer[3];
+		sprintf_s(buffer, "%02X", ch[i]);
+		out += buffer;
+	}
+	return out;
+}
+
 void writeMeInfoFile(std::string username, uint8_t uid[16], Status* status) {
 	ofstream file("me.info");
 	if (file) {
-		char buffer[3];
-
 		file << username << endl;
-		for (int j = 0; j < 16; j++) {
-			sprintf_s((&buffer)[0], "%02X", uid[j]);
-			file << buffer;
-		}
-		file << endl;
+		string uuid = charArrayToHexString(uid);
+		file << uuid << endl;
 		file.close();
 	}
 	else {

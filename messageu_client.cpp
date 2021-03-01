@@ -49,12 +49,14 @@ int main() {
 		cout << "52) Send your symmetric key" << endl;
 		cout << "0) Exit client" << endl;
 		getline(cin, input);
+		try {
 		option = stoi(input);
-
-		if (!cin) {
+		}
+		catch (exception& err)
+		{
 			cout << "Invalid input. \nEnter again - ";
 			cin.clear();
-			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			//cin.ignore(numeric_limits<streamsize>::max(), '\n');
 			continue;
 		}
 
