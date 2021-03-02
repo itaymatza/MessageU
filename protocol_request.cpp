@@ -39,3 +39,14 @@ ClientsListRequest* encodeClientsListRequest(uint8_t uid[16]) {
 	request->header.payoad_size = 0;
 	return request;
 }
+
+// Encode public key request by the protocol specification.
+PublicKeyRequest* encodePublicKeyRequest(uint8_t uid[16], uint8_t other_uid[16]) {
+	PublicKeyRequest* request = new PublicKeyRequest;
+	memcpy(request->header.uid, uid, 16);
+	request->header.version = CLIENT_VERSION;
+	request->header.code = RequestCode::PUBLIC_KEY_REQUEST;
+	request->header.payoad_size = sizeof(PublicKeyRequestPayload);
+	memcpy(request->payload.uid, other_uid, 16);
+	return request;
+}

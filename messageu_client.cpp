@@ -7,6 +7,7 @@
 	@version 2.0
 */
 #include <iostream>
+#include "client.h"
 #include "data_helper.h"
 #include "protocol_request.h"
 #include "protocol_response.h"
@@ -24,6 +25,7 @@ int main() {
 	string* port = new string();
 	string* clien_name = new string();
 	uint8_t uid[16];
+	vector<Client*>* clients = new vector<Client*>();
 
 	getServerInfo(ip, port, &status);
 	getClientInfo(clien_name, uid, &status);
@@ -92,14 +94,39 @@ int main() {
 			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(ClientsListRequest));
 			cout << "MessageU - Clients list:" << endl;
 			cout << "--------------------" << endl;
-			response = readServerClientsListResponse(sock);
+			response = readServerClientsListResponse(sock, clients);
 			cout << "--------------------" << endl;
 			cout << "End of Clients list." << "\n" << endl;
 			delete request;
 			delete response;
 			break;
 		case 3:
-			cout << "Option 3" << endl;
+		{
+			Client* wanted_client;
+			bool client_in_memory = false;
+
+			cout << "Selected option 3 - " << endl;
+			cout << "Please enter client name: " << endl;
+			getline(cin, input);
+			for (Client* client : *clients)
+			{
+				if (input == client->name)
+				{
+					wanted_client = client;
+					PublicKeyRequest* request;
+					request = encodePublicKeyRequest(uid, wanted_client->uid);
+					writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PublicKeyRequest));
+
+					delete request;
+					client_in_memory = true;
+					break;
+				}
+			}
+			if (!client_in_memory)
+			{
+				cout << "Client name is not in memory, try to get clients list and try again." << "\n" << endl;
+			}
+		}
 			break;
 		case 4:
 			cout << "Option 4" << endl;
@@ -125,7 +152,6 @@ int main() {
 
 		//if (system("CLS")) system("clear");
 	}
-
 	delete ip;
 	delete port;
 }

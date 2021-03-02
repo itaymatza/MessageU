@@ -63,9 +63,27 @@ struct ClientsListRequest
 };
 #pragma pack(pop)
 
+// Public key request payload struct.
+#pragma pack(push, 1)
+struct PublicKeyRequestPayload
+{
+	uint8_t uid[16];
+};
+#pragma pack(pop)
+
+// Public key request struct.
+#pragma pack(push, 1)
+struct PublicKeyRequest
+{
+	RequestHeader header;
+	PublicKeyRequestPayload payload;
+};
+#pragma pack(pop)
+
 
 RegisterRequest* encodeRegisterRequest(std::string username);
 ClientsListRequest* encodeClientsListRequest(uint8_t uid[16]);
+PublicKeyRequest* encodePublicKeyRequest(uint8_t uid[16], uint8_t other_uid[16]);
 void writeToServer(boost::asio::ip::tcp::socket& sock, uint8_t* request, unsigned long request_length);
 
 

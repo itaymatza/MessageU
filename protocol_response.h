@@ -11,7 +11,7 @@
 #include <fstream>
 #include <iostream>
 #include <boost/asio.hpp>
-
+#include "client.h"
 
 
 // Supported response status codes.
@@ -68,6 +68,6 @@ struct ClientsListResponse
 #pragma pack(pop)
 
 RegisterResponse* readServerRegisterResponse(boost::asio::ip::tcp::socket& sock);
-ClientsListResponse* readServerClientsListResponse(boost::asio::ip::tcp::socket& sock);
+ClientsListResponse* readServerClientsListResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients);
 
 #endif /* __PROTOCOL_RESPNSE_H__ */

@@ -17,14 +17,20 @@ RegisterResponse* readServerRegisterResponse(tcp::socket& sock) {
 	return response;
 }
 
-ClientsListResponse* readServerClientsListResponse(tcp::socket& sock) {
+ClientsListResponse* readServerClientsListResponse(tcp::socket& sock, vector<Client*>* clients) {
 	ClientsListResponse* response = new ClientsListResponse;
 	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->header), sizeof(ResponseHeader)));
 	size_t list_length = response->header.payoad_size / sizeof(ClientsListResponsePayload);
 	while (0 < list_length)
 	{
 		boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(ClientsListResponsePayload)));
-		cout << response->payload.client_name << endl;
+		Client* client = new Client();
+		string str(reinterpret_cast<char*>(&response->payload.client_name));
+		client->name = str;
+		memcpy(client->uid, response->payload.uid, sizeof(client->uid));
+		memset(client->public_key, 0, sizeof(client->public_key));
+		clients->push_back(client);
+		cout << client->name << endl;
 		list_length -= 1;
 	}
 	return response;
