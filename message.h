@@ -15,7 +15,7 @@ enum MessageType : uint8_t {
 	REQUEST_FOR_SYMMETRIC_KEY = 1,
 	SYMMETRIC_KEY = 2,
 	TEXT_MESSAGE = 3,
-	FILE = 4,
+	SEND_FILE = 4
 };
 
 
