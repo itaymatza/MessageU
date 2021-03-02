@@ -64,7 +64,7 @@ int main() {
 		switch (option) {
 		case 1:
 		{
-			cout << "Selected option 1 - " << endl;
+			cout << "Selected option 1 - register" << endl;
 			if (isFileExist("me.info")) {
 				cout << "me.info file is already exists." << "\n" << endl;
 			}
@@ -89,7 +89,7 @@ int main() {
 			break;
 		case 2:
 		{
-			cout << "Selected option 2 - " << endl;
+			cout << "Selected option 2 - clients list" << endl;
 			ClientsListRequest* request;
 			ClientsListResponse* response;
 
@@ -106,15 +106,16 @@ int main() {
 			break;
 		case 3:
 		{
-			cout << "Selected option 3 - " << endl;
-			cout << "Please enter client name: " << endl;
-			getline(cin, input);
+			string client_name;
+			cout << "Selected option 3 - request public key" << endl;
+			cout << "Please enter a client name to get a public key of: ";
+			getline(cin, client_name);
 			Client* wanted_client;
 			bool client_in_memory = false;
 
 			for (Client* client : *clients)
 			{
-				if (input == client->name)
+				if (client_name == client->name)
 				{
 					wanted_client = client;
 					PublicKeyRequest* request;
@@ -137,7 +138,7 @@ int main() {
 			break;
 		case 4:
 		{
-			cout << "Selected option 4 - " << endl;
+			cout << "Selected option 4 - waiting messages" << endl;
 			PullMessagesRequest* request;
 			PullMessagesResponse* response;
 
@@ -153,7 +154,41 @@ int main() {
 		}
 			break;
 		case 5:
-			cout << "Option 5" << endl;
+		{
+			string client_name;
+			cout << "Selected option 5 - send text message" << endl;
+			cout << "Please enter a client name to send a message to: ";
+			getline(cin, client_name);
+			Client* wanted_client;
+			bool client_in_memory = false;
+
+			for (Client* client : *clients)
+			{
+				if (client_name == client->name)
+				{
+					string message;
+					cout << "Please enter a message:" << endl;
+					getline(cin, message);
+
+					wanted_client = client;
+					SendTextMessageRequest* request;
+					SendTextMessageResponse* response;
+
+					request = encodeSendTextMessageRequest(uid, wanted_client->uid, message.length());
+					writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(SendTextMessageRequest));
+					boost::asio::write(sock, boost::asio::buffer(message, message.length()));
+					response = readServerSendTextMessageResponse(sock);
+					delete request;
+					delete response;
+					client_in_memory = true;
+					break;
+				}
+			}
+			if (!client_in_memory)
+			{
+				cout << "Client name is not in memory, try to get clients list and try again." << "\n" << endl;
+			}
+		}
 			break;
 		case 50:
 			cout << "Option 50" << endl;

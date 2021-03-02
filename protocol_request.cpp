@@ -60,3 +60,16 @@ PullMessagesRequest* encodePullMessagesRequest(uint8_t uid[16]){
 	request->header.payoad_size = 0;
 	return request;
 }
+
+// Encode public key request by the protocol specification.
+SendTextMessageRequest* encodeSendTextMessageRequest(uint8_t uid[16], uint8_t other_uid[16], size_t message_size) {
+	SendTextMessageRequest* request = new SendTextMessageRequest;
+	memcpy(request->header.uid, uid, 16);
+	request->header.version = CLIENT_VERSION;
+	request->header.code = RequestCode::PUSH_MESSAGE_REQUEST;
+	request->header.payoad_size = sizeof(SendTextMessageRequestPayload) + message_size;
+	memcpy(request->payload.uid, other_uid, 16);
+	request->payload.message_type = MessageType::TEXT_MESSAGE;
+	request->payload.message_size = message_size;
+	return request;
+}
