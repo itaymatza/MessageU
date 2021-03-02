@@ -61,9 +61,9 @@ int main() {
 
 		switch (option) {
 		case 1:
-			cout << "Option 1" << endl;
+			cout << "Selected option 1 - " << endl;
 			if (isFileExist("me.info")) {
-				cout << "me.info file is already exists." << endl << "\n";
+				cout << "me.info file is already exists." << "\n" << endl ;
 			}
 			else {
 				string username;
@@ -76,18 +76,27 @@ int main() {
 				}
 				request = encodeRegisterRequest(username);
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(RegisterRequest));
-				response = readServerResponse(sock);
+				response = readServerRegisterResponse(sock);
 				writeMeInfoFile(username, response->payload.uid, &status);
+				cout <<"Client registered successfully." << "\n" << endl;
 				delete request;
 				delete response;
 			}
 			break;
 		case 2:
-			cout << "Option 2" << endl;
 			ClientsListRequest* request;
+			ClientsListResponse* response;
+
+			cout <<"Selected option 2 - " << endl;
 			request = encodeClientsListRequest(uid);
 			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(ClientsListRequest));
-
+			cout << "MessageU - Clients list:" << endl;
+			cout << "--------------------" << endl;
+			response = readServerClientsListResponse(sock);
+			cout << "--------------------" << endl;
+			cout << "End of Clients list." << "\n" << endl;
+			delete request;
+			delete response;
 			break;
 		case 3:
 			cout << "Option 3" << endl;

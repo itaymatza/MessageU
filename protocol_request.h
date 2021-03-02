@@ -70,8 +70,4 @@ void writeToServer(boost::asio::ip::tcp::socket& sock, uint8_t* request, unsigne
 
 
 
-
-
-
-
 #endif /* __PROTOCOL_REQUEST_H__ */

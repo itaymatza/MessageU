@@ -50,7 +50,24 @@ struct RegisterResponse
 };
 #pragma pack(pop)
 
-RegisterResponse* readServerResponse(boost::asio::ip::tcp::socket& sock);
+// Client list response payload struct.
+#pragma pack(push, 1)
+struct ClientsListResponsePayload
+{
+	uint8_t uid[16];
+	uint8_t client_name[255];
+};
+#pragma pack(pop)
 
+#pragma pack(push, 1)
+struct ClientsListResponse
+{
+	ResponseHeader header;
+	ClientsListResponsePayload payload;
+};
+#pragma pack(pop)
+
+RegisterResponse* readServerRegisterResponse(boost::asio::ip::tcp::socket& sock);
+ClientsListResponse* readServerClientsListResponse(boost::asio::ip::tcp::socket& sock);
 
 #endif /* __PROTOCOL_RESPNSE_H__ */
