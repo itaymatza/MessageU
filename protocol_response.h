@@ -67,7 +67,25 @@ struct ClientsListResponse
 };
 #pragma pack(pop)
 
+// Public key response payload struct.
+#pragma pack(push, 1)
+struct PublicKeyResponsePayload
+{
+	uint8_t uid[16];
+	uint8_t public_key[160];
+};
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+struct PublicKeyResponse
+{
+	ResponseHeader header;
+	PublicKeyResponsePayload payload;
+};
+#pragma pack(pop)
+
 RegisterResponse* readServerRegisterResponse(boost::asio::ip::tcp::socket& sock);
 ClientsListResponse* readServerClientsListResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients);
+PublicKeyResponse* readPublicKeyResponse(boost::asio::ip::tcp::socket& sock, Client* client);
 
 #endif /* __PROTOCOL_RESPNSE_H__ */

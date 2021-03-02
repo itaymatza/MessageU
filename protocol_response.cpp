@@ -35,3 +35,12 @@ ClientsListResponse* readServerClientsListResponse(tcp::socket& sock, vector<Cli
 	}
 	return response;
 }
+
+
+PublicKeyResponse* readPublicKeyResponse(boost::asio::ip::tcp::socket& sock, Client* client) {
+	PublicKeyResponse* response = new PublicKeyResponse;
+	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->header), sizeof(ResponseHeader)));
+	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(PublicKeyResponsePayload)));
+	memcpy(client->public_key, response->payload.public_key, sizeof(client->public_key));
+	return response;
+}

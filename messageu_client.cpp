@@ -114,10 +114,13 @@ int main() {
 				{
 					wanted_client = client;
 					PublicKeyRequest* request;
+					PublicKeyResponse* response;
+
 					request = encodePublicKeyRequest(uid, wanted_client->uid);
 					writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PublicKeyRequest));
-
+					response = readPublicKeyResponse(sock, client);
 					delete request;
+					delete response;
 					client_in_memory = true;
 					break;
 				}
