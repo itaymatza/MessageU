@@ -132,7 +132,12 @@ int main() {
 		}
 			break;
 		case 4:
-			cout << "Option 4" << endl;
+			PullMessagesRequest* request;
+			cout << "Selected option 4 - " << endl;
+			cout << "Pulling waiting messages: " << endl;
+			request = encodePullMessagesRequest(uid);
+			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PullMessagesRequest));
+
 			break;
 		case 5:
 			cout << "Option 5" << endl;

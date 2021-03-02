@@ -22,8 +22,8 @@ enum RequestCode : uint8_t {
 	REGISTER_REQUEST = 100,
 	CLIENTS_LIST_REQUEST = 101,
 	PUBLIC_KEY_REQUEST = 102,
-	SEND_MESSAGE_REQUEST = 103,
-	PULL_MESSAGE_REQUEST = 104
+	PUSH_MESSAGE_REQUEST = 103,
+	PULL_MESSAGES_REQUEST = 104
 };
 
 // Request header struct.
@@ -80,10 +80,18 @@ struct PublicKeyRequest
 };
 #pragma pack(pop)
 
+// Pull messages request struct.
+#pragma pack(push, 1)
+struct PullMessagesRequest
+{
+	RequestHeader header;
+};
+#pragma pack(pop)
 
 RegisterRequest* encodeRegisterRequest(std::string username);
 ClientsListRequest* encodeClientsListRequest(uint8_t uid[16]);
 PublicKeyRequest* encodePublicKeyRequest(uint8_t uid[16], uint8_t other_uid[16]);
+PullMessagesRequest* encodePullMessagesRequest(uint8_t uid[16]);
 void writeToServer(boost::asio::ip::tcp::socket& sock, uint8_t* request, unsigned long request_length);
 
 

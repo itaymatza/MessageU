@@ -50,3 +50,13 @@ PublicKeyRequest* encodePublicKeyRequest(uint8_t uid[16], uint8_t other_uid[16])
 	memcpy(request->payload.uid, other_uid, 16);
 	return request;
 }
+
+// Encode pull messages request by the protocol specification.
+PullMessagesRequest* encodePullMessagesRequest(uint8_t uid[16]){
+	PullMessagesRequest* request = new PullMessagesRequest;
+	memcpy(request->header.uid, uid, 16);
+	request->header.version = CLIENT_VERSION;
+	request->header.code = RequestCode::PULL_MESSAGES_REQUEST;
+	request->header.payoad_size = 0;
+	return request;
+}
