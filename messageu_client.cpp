@@ -63,9 +63,10 @@ int main() {
 
 		switch (option) {
 		case 1:
+		{
 			cout << "Selected option 1 - " << endl;
 			if (isFileExist("me.info")) {
-				cout << "me.info file is already exists." << "\n" << endl ;
+				cout << "me.info file is already exists." << "\n" << endl;
 			}
 			else {
 				string username;
@@ -80,16 +81,18 @@ int main() {
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(RegisterRequest));
 				response = readServerRegisterResponse(sock);
 				writeMeInfoFile(username, response->payload.uid, &status);
-				cout <<"Client registered successfully." << "\n" << endl;
+				cout << "Client registered successfully." << "\n" << endl;
 				delete request;
 				delete response;
 			}
+		}
 			break;
 		case 2:
+		{
+			cout << "Selected option 2 - " << endl;
 			ClientsListRequest* request;
 			ClientsListResponse* response;
 
-			cout <<"Selected option 2 - " << endl;
 			request = encodeClientsListRequest(uid);
 			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(ClientsListRequest));
 			cout << "MessageU - Clients list:" << endl;
@@ -99,15 +102,16 @@ int main() {
 			cout << "End of Clients list." << "\n" << endl;
 			delete request;
 			delete response;
+		}
 			break;
 		case 3:
 		{
-			Client* wanted_client;
-			bool client_in_memory = false;
-
 			cout << "Selected option 3 - " << endl;
 			cout << "Please enter client name: " << endl;
 			getline(cin, input);
+			Client* wanted_client;
+			bool client_in_memory = false;
+
 			for (Client* client : *clients)
 			{
 				if (input == client->name)
@@ -118,7 +122,7 @@ int main() {
 
 					request = encodePublicKeyRequest(uid, wanted_client->uid);
 					writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PublicKeyRequest));
-					response = readPublicKeyResponse(sock, client);
+					response = readServerPublicKeyResponse(sock, client);
 					delete request;
 					delete response;
 					client_in_memory = true;
@@ -132,12 +136,21 @@ int main() {
 		}
 			break;
 		case 4:
-			PullMessagesRequest* request;
+		{
 			cout << "Selected option 4 - " << endl;
-			cout << "Pulling waiting messages: " << endl;
+			PullMessagesRequest* request;
+			PullMessagesResponse* response;
+
 			request = encodePullMessagesRequest(uid);
 			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PullMessagesRequest));
-
+			cout << "Pulling waiting messages:" << endl;
+			cout << "-------------------------" << endl;
+			response = readServerPullMessagesResponse(sock, clients);
+			cout << "----------------" << endl;
+			cout << "End of messages." << "\n" << endl;
+			delete request;
+			delete response;
+		}
 			break;
 		case 5:
 			cout << "Option 5" << endl;

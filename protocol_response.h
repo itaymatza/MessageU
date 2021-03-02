@@ -11,6 +11,7 @@
 #include <fstream>
 #include <iostream>
 #include <boost/asio.hpp>
+#include "message.h"
 #include "client.h"
 
 
@@ -19,8 +20,8 @@ enum ResponseCode : uint16_t {
 	REGISTERED_SUCCESSFULLY = 1000,
 	CLIENTS_LIST = 1001,
 	PUBLIC_KEY = 1002,
-	MESSAGE_SENT = 1003,
-	PULL_WAITING_MASSAGES = 1004,
+	PUSH_MESSAGE = 1003,
+	PULL_MESSAGES = 1004,
 	GENERAL_ERROR = 9000
 };
 
@@ -84,8 +85,27 @@ struct PublicKeyResponse
 };
 #pragma pack(pop)
 
+#pragma pack(push, 1)
+struct PullMessagesResponsePayload
+{
+	uint8_t uid[16];
+	uint32_t message_id;
+	uint8_t message_type;
+	uint32_t message_size;
+};
+#pragma pack(pop)
+
+#pragma pack(push, 1)
+struct PullMessagesResponse
+{
+	ResponseHeader header;
+	PullMessagesResponsePayload payload;
+};
+#pragma pack(pop)
+
 RegisterResponse* readServerRegisterResponse(boost::asio::ip::tcp::socket& sock);
 ClientsListResponse* readServerClientsListResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients);
-PublicKeyResponse* readPublicKeyResponse(boost::asio::ip::tcp::socket& sock, Client* client);
+PublicKeyResponse* readServerPublicKeyResponse(boost::asio::ip::tcp::socket& sock, Client* client);
+PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients);
 
 #endif /* __PROTOCOL_RESPNSE_H__ */

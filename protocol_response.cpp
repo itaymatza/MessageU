@@ -20,6 +20,7 @@ RegisterResponse* readServerRegisterResponse(tcp::socket& sock) {
 ClientsListResponse* readServerClientsListResponse(tcp::socket& sock, vector<Client*>* clients) {
 	ClientsListResponse* response = new ClientsListResponse;
 	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->header), sizeof(ResponseHeader)));
+
 	size_t list_length = response->header.payoad_size / sizeof(ClientsListResponsePayload);
 	while (0 < list_length)
 	{
@@ -37,10 +38,52 @@ ClientsListResponse* readServerClientsListResponse(tcp::socket& sock, vector<Cli
 }
 
 
-PublicKeyResponse* readPublicKeyResponse(boost::asio::ip::tcp::socket& sock, Client* client) {
+PublicKeyResponse* readServerPublicKeyResponse(boost::asio::ip::tcp::socket& sock, Client* client) {
 	PublicKeyResponse* response = new PublicKeyResponse;
 	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->header), sizeof(ResponseHeader)));
 	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(PublicKeyResponsePayload)));
 	memcpy(client->public_key, response->payload.public_key, sizeof(client->public_key));
+	return response;
+}
+
+
+PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients) {
+	PullMessagesResponse* response = new PullMessagesResponse;
+	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->header), sizeof(ResponseHeader)));
+
+	size_t list_length = response->header.payoad_size;
+	while (0 < list_length)
+	{
+		boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(PullMessagesResponse)));
+		list_length -= sizeof(PullMessagesResponse);
+		
+		string message;
+		boost::asio::read(sock, boost::asio::buffer(message, response->payload.message_size));
+		list_length -= response->payload.message_size;
+
+		cout << "From:\t";
+		bool client_in_memory = false;
+		for (Client* client : *clients)
+		{
+			if (memcmp(client->uid, response->payload.uid, sizeof(client->uid)) == 0)
+			{
+				cout << client->name << endl;
+				client_in_memory = true;
+				break;
+			}
+		}
+		if (!client_in_memory)
+		{
+			cout << "Error to fetch user name - the user name is not in memory" << endl;
+		}
+		cout << "Content:" << endl;
+		if(response->payload.message_type == MessageType::REQUEST_FOR_SYMMETRIC_KEY)
+			cout << "Request for symmetric key." << endl;
+		else if (response->payload.message_type == MessageType::SYMMETRIC_KEY)
+			cout << "Symmetric key received." << endl;
+		else if (response->payload.message_type == MessageType::TEXT_MESSAGE)
+			cout << message << endl;
+		cout << "-----<EOM>-----\n" << endl;
+	}
 	return response;
 }
