@@ -29,8 +29,8 @@ int main() {
 	uint8_t public_key[PUBKEY_LEN];
 	vector<Client*>* clients = new vector<Client*>();
 
-	getServerInfo(ip, port, &status);
-	getClientInfo(clien_name, uid, &status);
+	getServerInfoFromFile(ip, port, &status);
+	getClientInfoFromFile(clien_name, uid, &status, public_key);
 
 	boost::asio::io_context io_context;
 	tcp::socket sock(io_context);
@@ -86,7 +86,7 @@ int main() {
 				response = readServerRegisterResponse(sock);
 				writeMeInfoFile(username, response->payload.uid, &status);
 				cout << "Client registered successfully." << "\n" << endl;
-				getClientInfo(clien_name, uid, &status);
+				getClientInfoFromFile(clien_name, uid, &status, public_key);
 				delete request;
 				delete response;
 			}

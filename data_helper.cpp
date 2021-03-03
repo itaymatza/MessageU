@@ -10,6 +10,7 @@
 #include <boost/asio.hpp>
 
 using namespace std;
+constexpr int PUBKEY_LEN = 160;
 
 // Checks and returns if a given string is a number representation.
 bool is_number(const std::string& s)
@@ -25,7 +26,7 @@ bool is_number(const std::string& s)
 	If invalid info file format or port number - output stream for errors and exit.
 	Writes the info to ip and port string parameters.
 */
-void getServerInfo(string* ip, string* port, Status* status){
+void getServerInfoFromFile(string* ip, string* port, Status* status){
 
 	ifstream file("server.info");
 	if (file) {
@@ -72,20 +73,22 @@ void HexStringTocharArray(string str, uint8_t* uid) {
 	If invalid info file format - output stream for errors and exit.
 	Writes the info to n and port string parameters.
 */
-void getClientInfo(string* clien_name, uint8_t* uid, Status* status) {
+void getClientInfoFromFile(string* clien_name, uint8_t* uid, Status* status, uint8_t public_key[]) {
 
 	ifstream file("me.info");
 	if (file) {
-		string name, uidstring, is_end_of_file;
-		getline(file, name);
-		getline(file, uidstring);
-		if (getline(file, is_end_of_file)) {
+		string name, uidstring, key, buffer;
+		if (!getline(file, name) || !getline(file, uidstring) || !getline(file, key)) {
 			cerr << "Error: Illegal me.info file.\n";
 			*status = Status::client_info_error;
+		}
+		while (file >> buffer) {
+			key += buffer;
 		}
 
 		*clien_name = name;
 		HexStringTocharArray(uidstring, uid);
+		copy(key.begin(), key.begin() + PUBKEY_LEN, std::begin(key));
 		file.close();
 	}
 	else {
@@ -118,12 +121,21 @@ string charArrayToHexString(uint8_t ch[]) {
 }
 
 void writeMeInfoFile(std::string username, uint8_t uid[16], Status* status) {
-	fstream file("me.info");
-	if (file) {
-		file << username << endl;
+	string buffer, key;
+	ifstream ifile("me.info");
+	while (ifile >> buffer) {
+		key += buffer;
+		key += "\n";
+	}
+	ifile.close();
+
+	ofstream ofile("me.info");
+	if (ofile) {
+		ofile << username << endl;
 		string uuid = charArrayToHexString(uid);
-		file << uuid << endl;
-		file.close();
+		ofile << uuid << endl;
+		ofile << key << endl;
+		ofile.close();
 	}
 	else {
 		cerr << "Error: Unable to open and write me.info file.\n";
