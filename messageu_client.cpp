@@ -25,8 +25,8 @@ int main() {
 	string* ip = new string();
 	string* port = new string();
 	string* clien_name = new string();
-	uint8_t uid[16];
-	uint8_t public_key[160];
+	uint8_t uid[UID_LEN];
+	uint8_t public_key[PUBKEY_LEN];
 	vector<Client*>* clients = new vector<Client*>();
 
 	getServerInfo(ip, port, &status);

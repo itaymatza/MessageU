@@ -14,6 +14,7 @@
 #include "message.h"
 
 constexpr int CHUNK_SIZE = 1024;
+constexpr int UID_LEN = 16;
 constexpr int USERNAME_LEN = 255;
 constexpr int PUBKEY_LEN = 160;
 constexpr int CLIENT_VERSION = 2;
@@ -32,7 +33,7 @@ enum RequestCode : uint8_t {
 #pragma pack(push, 1)
 struct RequestHeader
 {
-	uint8_t uid[16];
+	uint8_t uid[UID_LEN];
 	uint8_t version;
 	uint8_t code;
 	uint32_t payoad_size;
@@ -44,7 +45,7 @@ struct RequestHeader
 struct RegisterRequestPayload
 {
 	uint8_t name[USERNAME_LEN];
-	uint8_t public_key[160];
+	uint8_t public_key[PUBKEY_LEN];
 };
 #pragma pack(pop)
 
@@ -69,7 +70,7 @@ struct ClientsListRequest
 #pragma pack(push, 1)
 struct PublicKeyRequestPayload
 {
-	uint8_t uid[16];
+	uint8_t uid[UID_LEN];
 };
 #pragma pack(pop)
 
@@ -94,7 +95,7 @@ struct PullMessagesRequest
 #pragma pack(push, 1)
 struct SendTextMessageRequestPayload
 {
-	uint8_t uid[16];
+	uint8_t uid[UID_LEN];
 	uint8_t message_type;
 	uint32_t message_size;
 };
@@ -110,10 +111,10 @@ struct SendTextMessageRequest
 #pragma pack(pop)
 
 RegisterRequest* encodeRegisterRequest(std::string username, uint8_t public_key[]);
-ClientsListRequest* encodeClientsListRequest(uint8_t uid[16]);
-PublicKeyRequest* encodePublicKeyRequest(uint8_t uid[16], uint8_t other_uid[16]);
-PullMessagesRequest* encodePullMessagesRequest(uint8_t uid[16]);
-SendTextMessageRequest* encodeSendTextMessageRequest(uint8_t uid[16], uint8_t other_uid[16], size_t message_size);
+ClientsListRequest* encodeClientsListRequest(uint8_t uid[UID_LEN]);
+PublicKeyRequest* encodePublicKeyRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN]);
+PullMessagesRequest* encodePullMessagesRequest(uint8_t uid[UID_LEN]);
+SendTextMessageRequest* encodeSendTextMessageRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN], size_t message_size);
 void writeToServer(boost::asio::ip::tcp::socket& sock, uint8_t* request, unsigned long request_length);
 
 
