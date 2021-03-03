@@ -10,6 +10,15 @@ using boost::asio::ip::tcp;
 constexpr int CHUNK_SIZE = 1024;
 
 
+void printVector(std::vector<char> const& input)
+{
+	for (int i = 0; i < input.size(); i++) {
+		cout << input.at(i);
+	}
+	cout << endl;
+}
+
+
 RegisterResponse* readServerRegisterResponse(tcp::socket& sock) {
 	RegisterResponse* response = new RegisterResponse;
 	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->header), sizeof(ResponseHeader)));
@@ -54,10 +63,10 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 	size_t list_length = response->header.payoad_size;
 	while (0 < list_length)
 	{
-		boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(PullMessagesResponse)));
-		list_length -= sizeof(PullMessagesResponse);
+		boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(PullMessagesResponsePayload)));
+		list_length -= sizeof(PullMessagesResponsePayload);
 		
-		string message;
+		vector<char> message(response->payload.message_size);
 		boost::asio::read(sock, boost::asio::buffer(message, response->payload.message_size));
 		list_length -= response->payload.message_size;
 
@@ -77,12 +86,13 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 			cout << "Error to fetch user name - the user name is not in memory" << endl;
 		}
 		cout << "Content:" << endl;
-		if(response->payload.message_type == MessageType::REQUEST_FOR_SYMMETRIC_KEY)
+		if (response->payload.message_type == MessageType::REQUEST_FOR_SYMMETRIC_KEY)
 			cout << "Request for symmetric key." << endl;
 		else if (response->payload.message_type == MessageType::SYMMETRIC_KEY)
 			cout << "Symmetric key received." << endl;
 		else if (response->payload.message_type == MessageType::TEXT_MESSAGE)
-			cout << message << endl;
+			printVector(message);
+		/*	cout << message << endl;*/
 		cout << "-----<EOM>-----\n" << endl;
 	}
 	return response;
