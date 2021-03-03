@@ -4,6 +4,7 @@
 	@author Itay Matza
 	@version 1.0 01/03/21
 */
+
 #include "protocol_request.h"
 using namespace std;
 using boost::asio::ip::tcp;
@@ -19,14 +20,18 @@ void writeToServer(tcp::socket& sock, uint8_t* request, unsigned long request_le
 }
 
 // Encode register request by the protocol specification.
-RegisterRequest* encodeRegisterRequest(string username) {
+RegisterRequest* encodeRegisterRequest(string username, uint8_t public_key[]) {
 	RegisterRequest* request = new RegisterRequest;
 	request->header.version = CLIENT_VERSION;
 	request->header.code = RequestCode::REGISTER_REQUEST;
 	request->header.payoad_size = sizeof(RegisterRequestPayload);
+
 	size_t size = min(username.size(), (size_t) USERNAME_LEN - 1);
 	copy(username.begin(), username.begin() + size, std::begin(request->payload.name));
 	request->payload.name[size] = '\0';
+
+	memcpy(request->payload.public_key, public_key, PUBKEY_LEN);
+
 	return request;
 }
 

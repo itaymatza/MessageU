@@ -1,7 +1,7 @@
 /**
 	Protocol request header file.
 	Decode requests and encode responses by the protocol specification.
-	@file protocol.h
+	@file protocol_request.h
 	@author Itay Matza
 	@version 2.0
 */
@@ -15,6 +15,7 @@
 
 constexpr int CHUNK_SIZE = 1024;
 constexpr int USERNAME_LEN = 255;
+constexpr int PUBKEY_LEN = 160;
 constexpr int CLIENT_VERSION = 2;
 
 
@@ -49,7 +50,7 @@ struct RegisterRequestPayload
 
 // Register request struct.
 #pragma pack(push, 1)
-struct RegisterRequest 
+struct RegisterRequest
 {
 	RequestHeader header;
 	RegisterRequestPayload payload;
@@ -108,7 +109,7 @@ struct SendTextMessageRequest
 };
 #pragma pack(pop)
 
-RegisterRequest* encodeRegisterRequest(std::string username);
+RegisterRequest* encodeRegisterRequest(std::string username, uint8_t public_key[]);
 ClientsListRequest* encodeClientsListRequest(uint8_t uid[16]);
 PublicKeyRequest* encodePublicKeyRequest(uint8_t uid[16], uint8_t other_uid[16]);
 PullMessagesRequest* encodePullMessagesRequest(uint8_t uid[16]);

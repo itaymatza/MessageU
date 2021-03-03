@@ -8,6 +8,7 @@
 */
 #include <iostream>
 #include "client.h"
+#include "crypto.h"
 #include "data_helper.h"
 #include "protocol_request.h"
 #include "protocol_response.h"
@@ -25,6 +26,7 @@ int main() {
 	string* port = new string();
 	string* clien_name = new string();
 	uint8_t uid[16];
+	uint8_t public_key[160];
 	vector<Client*>* clients = new vector<Client*>();
 
 	getServerInfo(ip, port, &status);
@@ -77,11 +79,14 @@ int main() {
 					cout << "Please enter new user name: ";
 					getline(cin, username);
 				}
-				request = encodeRegisterRequest(username);
+
+				GenRsaKeyPair(public_key);
+				request = encodeRegisterRequest(username, public_key);
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(RegisterRequest));
 				response = readServerRegisterResponse(sock);
 				writeMeInfoFile(username, response->payload.uid, &status);
 				cout << "Client registered successfully." << "\n" << endl;
+				getClientInfo(clien_name, uid, &status);
 				delete request;
 				delete response;
 			}

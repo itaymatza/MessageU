@@ -4,6 +4,7 @@
 	@author Itay Matza
 	@version 1.0 01/03/21
 */
+
 #include "protocol_response.h"
 using namespace std;
 using boost::asio::ip::tcp;
@@ -92,7 +93,6 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 			cout << "Symmetric key received." << endl;
 		else if (response->payload.message_type == MessageType::TEXT_MESSAGE)
 			printVector(message);
-		/*	cout << message << endl;*/
 		cout << "-----<EOM>-----\n" << endl;
 	}
 	return response;

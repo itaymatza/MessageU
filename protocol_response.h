@@ -1,7 +1,7 @@
 /**
 	Protocol response header file.
 	Decode requests and encode responses by the protocol specification.
-	@file protocol.h
+	@file protocol_response.h
 	@author Itay Matza
 	@version 2.0
 */

@@ -118,7 +118,7 @@ string charArrayToHexString(uint8_t ch[]) {
 }
 
 void writeMeInfoFile(std::string username, uint8_t uid[16], Status* status) {
-	ofstream file("me.info");
+	fstream file("me.info");
 	if (file) {
 		file << username << endl;
 		string uuid = charArrayToHexString(uid);
