@@ -5,6 +5,7 @@
 	@version 1.0 01/03/21
 */
 
+#include "crypto.h"
 #include "protocol_response.h"
 using namespace std;
 using boost::asio::ip::tcp;
@@ -56,7 +57,7 @@ PublicKeyResponse* readServerPublicKeyResponse(boost::asio::ip::tcp::socket& soc
 }
 
 
-PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients) {
+PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients, string* private_key) {
 	PullMessagesResponse* response = new PullMessagesResponse;
 	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->header), sizeof(ResponseHeader)));
 
@@ -65,18 +66,20 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 	{
 		boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(PullMessagesResponsePayload)));
 		list_length -= sizeof(PullMessagesResponsePayload);
-		
+
 		vector<char> message(response->payload.message_size);
 		boost::asio::read(sock, boost::asio::buffer(message, response->payload.message_size));
 		list_length -= response->payload.message_size;
 
 		cout << "From:\t";
 		bool client_in_memory = false;
+		Client* wanted_client = new Client();
 		for (Client* client : *clients)
 		{
 			if (memcmp(client->uid, response->payload.uid, sizeof(client->uid)) == 0)
 			{
 				cout << client->name << endl;
+				wanted_client = client;
 				client_in_memory = true;
 				break;
 			}
@@ -87,17 +90,25 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 		}
 		cout << "Content:" << endl;
 		if (response->payload.message_type == MessageType::REQUEST_FOR_SYMMETRIC_KEY)
+		{
 			cout << "Request for symmetric key." << endl;
+		}
 		else if (response->payload.message_type == MessageType::SYMMETRIC_KEY)
+		{
 			cout << "Symmetric key received." << endl;
+			string decrypted_symmetric_key = decryptRsaString(private_key, message);
+			copy(decrypted_symmetric_key.begin(), decrypted_symmetric_key.begin() + AES_KEYSIZE, std::begin(wanted_client->symmetric_key));
+		}
 		else if (response->payload.message_type == MessageType::TEXT_MESSAGE)
+		{
 			printVector(message);
+		}
 		cout << "-----<EOM>-----\n" << endl;
 	}
 	return response;
 }
 
-PushMessageResponse* readServerPushMessageResponse(boost::asio::ip::tcp::socket& sock){
+PushMessageResponse* readServerPushMessageResponse(boost::asio::ip::tcp::socket& sock) {
 	PushMessageResponse* response = new PushMessageResponse;
 	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->header), sizeof(ResponseHeader)));
 	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(PushMessageResponsePayload)));
