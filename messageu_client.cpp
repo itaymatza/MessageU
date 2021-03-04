@@ -78,7 +78,7 @@ int main() {
 				}
 
 				uint8_t public_key[PUBKEY_LEN];
-				GenRsaKeyPair(public_key);
+				genRsaKeyPair(public_key);
 				RegisterRequest* request = encodeRegisterRequest(username, public_key);
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(RegisterRequest));
 				RegisterResponse* response = readServerRegisterResponse(sock);
