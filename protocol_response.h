@@ -13,7 +13,7 @@
 #include <boost/asio.hpp>
 #include "message.h"
 #include "client.h"
-
+#include "crypto.h"
 
 // Supported response status codes.
 enum ResponseCode : uint16_t {
@@ -123,7 +123,7 @@ struct PushMessageResponse
 RegisterResponse* readServerRegisterResponse(boost::asio::ip::tcp::socket& sock);
 ClientsListResponse* readServerClientsListResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients);
 PublicKeyResponse* readServerPublicKeyResponse(boost::asio::ip::tcp::socket& sock, Client* client);
-PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients);
+PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients, std::string* private_key);
 PushMessageResponse* readServerPushMessageResponse(boost::asio::ip::tcp::socket& sock);
 
 #endif /* __PROTOCOL_RESPNSE_H__ */

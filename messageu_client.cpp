@@ -131,7 +131,7 @@ int main() {
 			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PullMessagesRequest));
 			cout << "Pulling waiting messages:" << endl;
 			cout << "-------------------------" << endl;
-			PullMessagesResponse* response = readServerPullMessagesResponse(sock, clients_list);
+			PullMessagesResponse* response = readServerPullMessagesResponse(sock, clients_list, private_key);
 			cout << "-------------------------" << endl;
 			cout << "End of messages." << "\n" << endl;
 
