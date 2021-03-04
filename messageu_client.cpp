@@ -112,18 +112,15 @@ int main() {
 			cout << "Selected option 3 - Request for public key" << endl;
 			Client* wanted_client = new Client();
 
-			if (!getClientFromInput(wanted_client, clients_list))
+			if (getClientFromInput(wanted_client, clients_list))
 			{
-				cout << "Client name is not in memory, try to get clients list and try again." << "\n" << endl;
-				break;
+				PublicKeyRequest* request = encodePublicKeyRequest(uid, wanted_client->uid);
+				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PublicKeyRequest));
+				PublicKeyResponse* response = readServerPublicKeyResponse(sock, wanted_client);
+
+				delete request;
+				delete response;
 			}
-
-			PublicKeyRequest* request = encodePublicKeyRequest(uid, wanted_client->uid);
-			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PublicKeyRequest));
-			PublicKeyResponse* response = readServerPublicKeyResponse(sock, wanted_client);
-
-			delete request;
-			delete response;
 			break;
 		}
 		case 4:
@@ -147,23 +144,20 @@ int main() {
 			cout << "Selected option 5 - Send a text message" << endl;
 			Client* wanted_client = new Client();
 
-			if (!getClientFromInput(wanted_client, clients_list))
+			if (getClientFromInput(wanted_client, clients_list))
 			{
-				cout << "Client name is not in memory, try to get clients list and try again." << "\n" << endl;
-				break;
+				string message;
+				cout << "Please enter a message:" << endl;
+				getline(cin, message);
+
+				PushMessageRequest* request = encodePushTextMessageRequest(uid, wanted_client->uid, message.length());
+				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
+				boost::asio::write(sock, boost::asio::buffer(message, message.length()));
+				PushMessageResponse* response = readServerPushMessageResponse(sock);
+
+				delete request;
+				delete response;
 			}
-
-			string message;
-			cout << "Please enter a message:" << endl;
-			getline(cin, message);
-
-			PushMessageRequest* request = encodePushTextMessageRequest(uid, wanted_client->uid, message.length());
-			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
-			boost::asio::write(sock, boost::asio::buffer(message, message.length()));
-			PushMessageResponse* response = readServerPushMessageResponse(sock);
-
-			delete request;
-			delete response;
 			break;
 		}
 		case 50:
