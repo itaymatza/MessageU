@@ -36,9 +36,9 @@ RegisterRequest* encodeRegisterRequest(string username, uint8_t public_key[]) {
 }
 
 // Encode client list request by the protocol specification.
-ClientsListRequest* encodeClientsListRequest(uint8_t uid[16]) {
+ClientsListRequest* encodeClientsListRequest(uint8_t uid[UID_LEN]) {
 	ClientsListRequest* request = new ClientsListRequest;
-	memcpy(request->header.uid, uid, 16);
+	memcpy(request->header.uid, uid, UID_LEN);
 	request->header.version = CLIENT_VERSION;
 	request->header.code = RequestCode::CLIENTS_LIST_REQUEST;
 	request->header.payoad_size = 0;
@@ -46,20 +46,20 @@ ClientsListRequest* encodeClientsListRequest(uint8_t uid[16]) {
 }
 
 // Encode public key request by the protocol specification.
-PublicKeyRequest* encodePublicKeyRequest(uint8_t uid[16], uint8_t other_uid[16]) {
+PublicKeyRequest* encodePublicKeyRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN]) {
 	PublicKeyRequest* request = new PublicKeyRequest;
-	memcpy(request->header.uid, uid, 16);
+	memcpy(request->header.uid, uid, UID_LEN);
 	request->header.version = CLIENT_VERSION;
 	request->header.code = RequestCode::PUBLIC_KEY_REQUEST;
 	request->header.payoad_size = sizeof(PublicKeyRequestPayload);
-	memcpy(request->payload.uid, other_uid, 16);
+	memcpy(request->payload.uid, other_uid, UID_LEN);
 	return request;
 }
 
 // Encode pull messages request by the protocol specification.
-PullMessagesRequest* encodePullMessagesRequest(uint8_t uid[16]){
+PullMessagesRequest* encodePullMessagesRequest(uint8_t uid[UID_LEN]){
 	PullMessagesRequest* request = new PullMessagesRequest;
-	memcpy(request->header.uid, uid, 16);
+	memcpy(request->header.uid, uid, UID_LEN);
 	request->header.version = CLIENT_VERSION;
 	request->header.code = RequestCode::PULL_MESSAGES_REQUEST;
 	request->header.payoad_size = 0;
@@ -67,13 +67,13 @@ PullMessagesRequest* encodePullMessagesRequest(uint8_t uid[16]){
 }
 
 // Encode public key request by the protocol specification.
-SendTextMessageRequest* encodeSendTextMessageRequest(uint8_t uid[16], uint8_t other_uid[16], size_t message_size) {
-	SendTextMessageRequest* request = new SendTextMessageRequest;
-	memcpy(request->header.uid, uid, 16);
+PushMessageRequest* encodePushTextMessageRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN], size_t message_size) {
+	PushMessageRequest* request = new PushMessageRequest;
+	memcpy(request->header.uid, uid, UID_LEN);
 	request->header.version = CLIENT_VERSION;
 	request->header.code = RequestCode::PUSH_MESSAGE_REQUEST;
-	request->header.payoad_size = sizeof(SendTextMessageRequestPayload) + message_size;
-	memcpy(request->payload.uid, other_uid, 16);
+	request->header.payoad_size = sizeof(PushMessageRequestPayload) + message_size;
+	memcpy(request->payload.uid, other_uid, UID_LEN);
 	request->payload.message_type = MessageType::TEXT_MESSAGE;
 	request->payload.message_size = message_size;
 	return request;

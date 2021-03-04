@@ -72,7 +72,6 @@ int main() {
 			}
 			else {
 				string username;
-
 				while (username.empty()) {
 					cout << "Please enter new user name: ";
 					getline(cin, username);
@@ -86,6 +85,7 @@ int main() {
 				writeMeInfoFile(username, response->payload.uid, &status);
 				cout << "Client registered successfully." << "\n" << endl;
 				getClientInfoFromFile(client_name, uid, private_key, &status);
+
 				delete request;
 				delete response;
 			}
@@ -102,6 +102,7 @@ int main() {
 			ClientsListResponse* response = readServerClientsListResponse(sock, clients_list);
 			cout << "--------------------" << endl;
 			cout << "End of Clients list." << "\n" << endl;
+
 			delete request;
 			delete response;
 			break;
@@ -156,10 +157,10 @@ int main() {
 			cout << "Please enter a message:" << endl;
 			getline(cin, message);
 
-			SendTextMessageRequest* request = encodeSendTextMessageRequest(uid, wanted_client->uid, message.length());
-			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(SendTextMessageRequest));
+			PushMessageRequest* request = encodePushTextMessageRequest(uid, wanted_client->uid, message.length());
+			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
 			boost::asio::write(sock, boost::asio::buffer(message, message.length()));
-			SendTextMessageResponse* response = readServerSendTextMessageResponse(sock);
+			PushMessageResponse* response = readServerPushTextMessageResponse(sock);
 
 			delete request;
 			delete response;
@@ -183,10 +184,10 @@ int main() {
 			cout << "Please enter a message:" << endl;
 			getline(cin, message);
 
-			SendTextMessageRequest* request = encodeSendTextMessageRequest(uid, wanted_client->uid, message.length());
-			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(SendTextMessageRequest));
+			PushMessageRequest* request = encodePushTextMessageRequest(uid, wanted_client->uid, message.length());
+			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
 			boost::asio::write(sock, boost::asio::buffer(message, message.length()));
-			SendTextMessageResponse* response = readServerSendTextMessageResponse(sock);
+			PushMessageResponse* response = readServerPushTextMessageResponse(sock);
 
 			delete request;
 			delete response;

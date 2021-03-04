@@ -97,9 +97,9 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 	return response;
 }
 
-SendTextMessageResponse* readServerSendTextMessageResponse(boost::asio::ip::tcp::socket& sock){
-	SendTextMessageResponse* response = new SendTextMessageResponse;
+PushMessageResponse* readServerPushTextMessageResponse(boost::asio::ip::tcp::socket& sock){
+	PushMessageResponse* response = new PushMessageResponse;
 	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->header), sizeof(ResponseHeader)));
-	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(SendTextMessageResponsePayload)));
+	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(PushMessageResponsePayload)));
 	return response;
 }

@@ -93,7 +93,7 @@ struct PullMessagesRequest
 
 // Send message request payload struct.
 #pragma pack(push, 1)
-struct SendTextMessageRequestPayload
+struct PushMessageRequestPayload
 {
 	uint8_t uid[UID_LEN];
 	uint8_t message_type;
@@ -103,10 +103,10 @@ struct SendTextMessageRequestPayload
 
 // Send message request struct.
 #pragma pack(push, 1)
-struct SendTextMessageRequest
+struct PushMessageRequest
 {
 	RequestHeader header;
-	SendTextMessageRequestPayload payload;
+	PushMessageRequestPayload payload;
 };
 #pragma pack(pop)
 
@@ -114,7 +114,7 @@ RegisterRequest* encodeRegisterRequest(std::string username, uint8_t public_key[
 ClientsListRequest* encodeClientsListRequest(uint8_t uid[UID_LEN]);
 PublicKeyRequest* encodePublicKeyRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN]);
 PullMessagesRequest* encodePullMessagesRequest(uint8_t uid[UID_LEN]);
-SendTextMessageRequest* encodeSendTextMessageRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN], size_t message_size);
+PushMessageRequest* encodePushTextMessageRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN], size_t message_size);
 void writeToServer(boost::asio::ip::tcp::socket& sock, uint8_t* request, unsigned long request_length);
 
 

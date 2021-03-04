@@ -105,7 +105,7 @@ struct PullMessagesResponse
 
 // Send text message response payload struct.
 #pragma pack(push, 1)
-struct SendTextMessageResponsePayload
+struct PushMessageResponsePayload
 {
 	uint8_t uid[16];
 	uint32_t message_id;
@@ -113,10 +113,10 @@ struct SendTextMessageResponsePayload
 #pragma pack(pop)
 
 #pragma pack(push, 1)
-struct SendTextMessageResponse
+struct PushMessageResponse
 {
 	ResponseHeader header;
-	SendTextMessageResponsePayload payload;
+	PushMessageResponsePayload payload;
 };
 #pragma pack(pop)
 
@@ -124,6 +124,6 @@ RegisterResponse* readServerRegisterResponse(boost::asio::ip::tcp::socket& sock)
 ClientsListResponse* readServerClientsListResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients);
 PublicKeyResponse* readServerPublicKeyResponse(boost::asio::ip::tcp::socket& sock, Client* client);
 PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients);
-SendTextMessageResponse* readServerSendTextMessageResponse(boost::asio::ip::tcp::socket& sock);
+PushMessageResponse* readServerPushTextMessageResponse(boost::asio::ip::tcp::socket& sock);
 
 #endif /* __PROTOCOL_RESPNSE_H__ */
