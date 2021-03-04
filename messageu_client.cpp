@@ -132,7 +132,7 @@ int main() {
 			cout << "Pulling waiting messages:" << endl;
 			cout << "-------------------------" << endl;
 			PullMessagesResponse* response = readServerPullMessagesResponse(sock, clients_list);
-			cout << "----------------" << endl;
+			cout << "-------------------------" << endl;
 			cout << "End of messages." << "\n" << endl;
 
 			delete request;
@@ -150,9 +150,9 @@ int main() {
 				cout << "Please enter a message:" << endl;
 				getline(cin, message);
 
-				PushMessageRequest* request = encodePushTextMessageRequest(uid, wanted_client->uid, message.length());
+				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::TEXT_MESSAGE, message.length());
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
-				boost::asio::write(sock, boost::asio::buffer(message, message.length()));
+				boost::asio::write(sock, boost::asio::buffer(message, message.size()));
 				PushMessageResponse* response = readServerPushMessageResponse(sock);
 
 				delete request;
@@ -170,7 +170,7 @@ int main() {
 
 			if (getClientFromInput(&wanted_client, clients_list))
 			{
-				PushMessageRequest* request = encodePushReqKeyMessageRequest(uid, wanted_client->uid);
+				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::REQUEST_FOR_SYMMETRIC_KEY, 0);
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
 				PushMessageResponse* response = readServerPushMessageResponse(sock);
 
@@ -186,18 +186,16 @@ int main() {
 
 			if (getClientFromInput(&wanted_client, clients_list))
 			{
-				string encrypted_key;
 				genAesKey(wanted_client->symmetric_key);
-				encrypted_key = encryptRsaString(wanted_client->public_key, reinterpret_cast<char*>(wanted_client->symmetric_key));
-				cout << encrypted_key;
+				string encrypted_symmetric_key = encryptRsaString(wanted_client->public_key, reinterpret_cast<char*>(wanted_client->symmetric_key));
 
+				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::SYMMETRIC_KEY, encrypted_symmetric_key.size());
+				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
+				boost::asio::write(sock, boost::asio::buffer(encrypted_symmetric_key, encrypted_symmetric_key.size()));
+				PushMessageResponse* response = readServerPushMessageResponse(sock);
 
-				//PushMessageRequest* request = encodePushReqKeyMessageRequest(uid, wanted_client->uid);
-				//writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
-				//PushMessageResponse* response = readServerPushMessageResponse(sock);
-
-				//delete request;
-				//delete response;
+				delete request;
+				delete response;
 			}
 			break;
 		}

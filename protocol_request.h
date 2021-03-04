@@ -11,7 +11,6 @@
 #include <fstream>
 #include <iostream>
 #include <boost/asio.hpp>
-#include "message.h"
 
 constexpr int CHUNK_SIZE = 1024;
 constexpr int UID_LEN = 16;
@@ -114,8 +113,7 @@ RegisterRequest* encodeRegisterRequest(std::string username, uint8_t public_key[
 ClientsListRequest* encodeClientsListRequest(uint8_t uid[UID_LEN]);
 PublicKeyRequest* encodePublicKeyRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN]);
 PullMessagesRequest* encodePullMessagesRequest(uint8_t uid[UID_LEN]);
-PushMessageRequest* encodePushTextMessageRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN], size_t message_size);
-PushMessageRequest* encodePushReqKeyMessageRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN]);
+PushMessageRequest* encodePushMessageRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN], uint8_t message_type, size_t message_size);
 void writeToServer(boost::asio::ip::tcp::socket& sock, uint8_t* request, unsigned long request_length);
 
 #endif /* __PROTOCOL_REQUEST_H__ */
