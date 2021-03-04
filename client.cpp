@@ -1,7 +1,12 @@
 #include "client.h"
+#include <iostream>
 
 
-bool isClientExistsInClientsList(std::string client_name, Client* wanted_client, std::vector<Client*>* clients) {
+bool isClientExistsInClientsList(Client* wanted_client, std::vector<Client*>* clients) {
+	std::cout << "Please enter a client name: ";
+	std::string client_name;
+	std::getline(std::cin, client_name);
+
 	for (Client* client : *clients)
 	{
 		if (client_name == client->name)

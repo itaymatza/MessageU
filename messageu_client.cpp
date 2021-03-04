@@ -113,12 +113,9 @@ int main() {
 		case 3:
 		{
 			cout << "Selected option 3 - Request for public key" << endl;
-			cout << "Please enter a client name to get a public key of: ";
-			string other_client_name;
-			getline(cin, other_client_name);
 			Client* wanted_client = new Client();
 
-			if (!isClientExistsInClientsList(other_client_name, wanted_client, clients_list))
+			if (!isClientExistsInClientsList(wanted_client, clients_list))
 			{
 				cout << "Client name is not in memory, try to get clients list and try again." << "\n" << endl;
 				break;
@@ -152,13 +149,10 @@ int main() {
 		}
 		case 5:
 		{
-			cout << "Selected option 51 - Send a request for symmetric key" << endl;
-			cout << "Please enter a client name to send a message to: ";
-			string other_client_name;
-			getline(cin, other_client_name);
+			cout << "Selected option 5 - Send a text message" << endl;
 			Client* wanted_client = new Client();
 
-			if (!isClientExistsInClientsList(other_client_name, wanted_client, clients_list))
+			if (!isClientExistsInClientsList(wanted_client, clients_list))
 			{
 				cout << "Client name is not in memory, try to get clients list and try again." << "\n" << endl;
 				break;
@@ -182,6 +176,26 @@ int main() {
 			break;
 		case 51:
 		{
+			cout << "Selected option 51 - Send a request for symmetric key" << endl;
+			Client* wanted_client = new Client();
+
+			if (!isClientExistsInClientsList(wanted_client, clients_list))
+			{
+				cout << "Client name is not in memory, try to get clients list and try again." << "\n" << endl;
+				break;
+			}
+
+			string message;
+			cout << "Please enter a message:" << endl;
+			getline(cin, message);
+
+			SendTextMessageRequest* request = encodeSendTextMessageRequest(uid, wanted_client->uid, message.length());
+			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(SendTextMessageRequest));
+			boost::asio::write(sock, boost::asio::buffer(message, message.length()));
+			SendTextMessageResponse* response = readServerSendTextMessageResponse(sock);
+
+			delete request;
+			delete response;
 			break;
 		}
 		case 52:
