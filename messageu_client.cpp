@@ -149,10 +149,11 @@ int main() {
 				string message;
 				cout << "Please enter a message:" << endl;
 				getline(cin, message);
+				string ciphertext = encryptAesString(wanted_client->symmetric_key, message);
 
-				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::TEXT_MESSAGE, message.length());
+				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::TEXT_MESSAGE, ciphertext.length());
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
-				boost::asio::write(sock, boost::asio::buffer(message, message.size()));
+				boost::asio::write(sock, boost::asio::buffer(ciphertext, ciphertext.size()));
 				PushMessageResponse* response = readServerPushMessageResponse(sock);
 
 				delete request;

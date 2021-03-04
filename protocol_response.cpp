@@ -88,6 +88,7 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 			cout << "Error to fetch user name - the user name is not in memory" << endl;
 		}
 		cout << "Content:" << endl;
+		std::string ciphertext(message.begin(), message.end());
 		if (response->payload.message_type == MessageType::REQUEST_FOR_SYMMETRIC_KEY)
 		{
 			cout << "Request for symmetric key." << endl;
@@ -95,13 +96,13 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 		else if (response->payload.message_type == MessageType::SYMMETRIC_KEY)
 		{
 			cout << "Symmetric key received." << endl;
-			std::string ciphertext(message.begin(), message.end());
 			string decrypted_symmetric_key = decryptRsaString(*private_key, ciphertext);
 			copy(decrypted_symmetric_key.begin(), decrypted_symmetric_key.begin() + AES_KEYSIZE, std::begin(wanted_client->symmetric_key));
 		}
 		else if (response->payload.message_type == MessageType::TEXT_MESSAGE)
 		{
-			printVector(message);
+			string message = decryptAesString(wanted_client->symmetric_key, ciphertext);
+			cout << message << endl;
 		}
 		cout << "-----<EOM>-----\n" << endl;
 	}
