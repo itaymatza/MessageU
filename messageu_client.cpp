@@ -111,7 +111,7 @@ int main() {
 			cout << "Selected option 3 - Request for public key" << endl;
 			Client* wanted_client = new Client();
 
-			if (!isClientExistsInClientsList(wanted_client, clients_list))
+			if (!getClientFromInput(wanted_client, clients_list))
 			{
 				cout << "Client name is not in memory, try to get clients list and try again." << "\n" << endl;
 				break;
@@ -146,7 +146,7 @@ int main() {
 			cout << "Selected option 5 - Send a text message" << endl;
 			Client* wanted_client = new Client();
 
-			if (!isClientExistsInClientsList(wanted_client, clients_list))
+			if (!getClientFromInput(wanted_client, clients_list))
 			{
 				cout << "Client name is not in memory, try to get clients list and try again." << "\n" << endl;
 				break;
@@ -173,7 +173,7 @@ int main() {
 			cout << "Selected option 51 - Send a request for symmetric key" << endl;
 			Client* wanted_client = new Client();
 
-			if (!isClientExistsInClientsList(wanted_client, clients_list))
+			if (!getClientFromInput(wanted_client, clients_list))
 			{
 				cout << "Client name is not in memory, try to get clients list and try again." << "\n" << endl;
 				break;

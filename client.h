@@ -17,6 +17,6 @@ public:
 	uint8_t public_key[160];
 };
 
-bool isClientExistsInClientsList(Client* wanted_client, std::vector<Client*>* clients);
+bool getClientFromInput(Client* wanted_client, std::vector<Client*>* clients);
 
 #endif /* __CLIENT__ */
