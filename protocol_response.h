@@ -124,6 +124,6 @@ RegisterResponse* readServerRegisterResponse(boost::asio::ip::tcp::socket& sock)
 ClientsListResponse* readServerClientsListResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients);
 PublicKeyResponse* readServerPublicKeyResponse(boost::asio::ip::tcp::socket& sock, Client* client);
 PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients);
-PushMessageResponse* readServerPushTextMessageResponse(boost::asio::ip::tcp::socket& sock);
+PushMessageResponse* readServerPushMessageResponse(boost::asio::ip::tcp::socket& sock);
 
 #endif /* __PROTOCOL_RESPNSE_H__ */

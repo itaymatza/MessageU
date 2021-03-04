@@ -160,7 +160,7 @@ int main() {
 			PushMessageRequest* request = encodePushTextMessageRequest(uid, wanted_client->uid, message.length());
 			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
 			boost::asio::write(sock, boost::asio::buffer(message, message.length()));
-			PushMessageResponse* response = readServerPushTextMessageResponse(sock);
+			PushMessageResponse* response = readServerPushMessageResponse(sock);
 
 			delete request;
 			delete response;
@@ -174,23 +174,15 @@ int main() {
 			cout << "Selected option 51 - Send a request for symmetric key" << endl;
 			Client* wanted_client = new Client();
 
-			if (!getClientFromInput(wanted_client, clients_list))
+			if (getClientFromInput(wanted_client, clients_list))
 			{
-				cout << "Client name is not in memory, try to get clients list and try again." << "\n" << endl;
-				break;
+				PushMessageRequest* request = encodePushReqKeyMessageRequest(uid, wanted_client->uid);
+				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
+				PushMessageResponse* response = readServerPushMessageResponse(sock);
+
+				delete request;
+				delete response;
 			}
-
-			string message;
-			cout << "Please enter a message:" << endl;
-			getline(cin, message);
-
-			PushMessageRequest* request = encodePushTextMessageRequest(uid, wanted_client->uid, message.length());
-			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
-			boost::asio::write(sock, boost::asio::buffer(message, message.length()));
-			PushMessageResponse* response = readServerPushTextMessageResponse(sock);
-
-			delete request;
-			delete response;
 			break;
 		}
 		case 52:

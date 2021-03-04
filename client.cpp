@@ -14,5 +14,6 @@ bool getClientFromInput(Client* wanted_client, std::vector<Client*>* clients) {
 			return true;
 		}
 	}
+	std::cout << "Client name is not in memory, try to get clients list and try again.\n" << std::endl;
 	return false;
 }

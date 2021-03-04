@@ -115,8 +115,7 @@ ClientsListRequest* encodeClientsListRequest(uint8_t uid[UID_LEN]);
 PublicKeyRequest* encodePublicKeyRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN]);
 PullMessagesRequest* encodePullMessagesRequest(uint8_t uid[UID_LEN]);
 PushMessageRequest* encodePushTextMessageRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN], size_t message_size);
+PushMessageRequest* encodePushReqKeyMessageRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN]);
 void writeToServer(boost::asio::ip::tcp::socket& sock, uint8_t* request, unsigned long request_length);
-
-
 
 #endif /* __PROTOCOL_REQUEST_H__ */

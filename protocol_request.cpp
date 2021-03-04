@@ -66,7 +66,7 @@ PullMessagesRequest* encodePullMessagesRequest(uint8_t uid[UID_LEN]){
 	return request;
 }
 
-// Encode public key request by the protocol specification.
+// Encode push text message request by the protocol specification.
 PushMessageRequest* encodePushTextMessageRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN], size_t message_size) {
 	PushMessageRequest* request = new PushMessageRequest;
 	memcpy(request->header.uid, uid, UID_LEN);
@@ -76,5 +76,18 @@ PushMessageRequest* encodePushTextMessageRequest(uint8_t uid[UID_LEN], uint8_t o
 	memcpy(request->payload.uid, other_uid, UID_LEN);
 	request->payload.message_type = MessageType::TEXT_MESSAGE;
 	request->payload.message_size = message_size;
+	return request;
+}
+
+// Encode push request for symmetric key message request by the protocol specification.
+PushMessageRequest* encodePushReqKeyMessageRequest(uint8_t uid[UID_LEN], uint8_t other_uid[UID_LEN]) {
+	PushMessageRequest* request = new PushMessageRequest;
+	memcpy(request->header.uid, uid, UID_LEN);
+	request->header.version = CLIENT_VERSION;
+	request->header.code = RequestCode::PUSH_MESSAGE_REQUEST;
+	request->header.payoad_size = sizeof(PushMessageRequestPayload);
+	memcpy(request->payload.uid, other_uid, UID_LEN);
+	request->payload.message_type = MessageType::REQUEST_FOR_SYMMETRIC_KEY;
+	request->payload.message_size = 0;
 	return request;
 }
