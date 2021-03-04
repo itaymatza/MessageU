@@ -112,7 +112,7 @@ int main() {
 			cout << "Selected option 3 - Request for public key" << endl;
 			Client* wanted_client = new Client();
 
-			if (getClientFromInput(wanted_client, clients_list))
+			if (getClientFromInput(&wanted_client, clients_list))
 			{
 				PublicKeyRequest* request = encodePublicKeyRequest(uid, wanted_client->uid);
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PublicKeyRequest));
@@ -144,7 +144,7 @@ int main() {
 			cout << "Selected option 5 - Send a text message" << endl;
 			Client* wanted_client = new Client();
 
-			if (getClientFromInput(wanted_client, clients_list))
+			if (getClientFromInput(&wanted_client, clients_list))
 			{
 				string message;
 				cout << "Please enter a message:" << endl;
@@ -168,7 +168,7 @@ int main() {
 			cout << "Selected option 51 - Send a request for symmetric key" << endl;
 			Client* wanted_client = new Client();
 
-			if (getClientFromInput(wanted_client, clients_list))
+			if (getClientFromInput(&wanted_client, clients_list))
 			{
 				PushMessageRequest* request = encodePushReqKeyMessageRequest(uid, wanted_client->uid);
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
@@ -180,8 +180,27 @@ int main() {
 			break;
 		}
 		case 52:
-			cout << "Option 52" << endl;
+		{
+			cout << "Selected option 52 - Send your symmetric key" << endl;
+			Client* wanted_client = new Client();
+
+			if (getClientFromInput(&wanted_client, clients_list))
+			{
+				string encrypted_key;
+				genAesKey(wanted_client->symmetric_key);
+				encrypted_key = encryptRsaString(wanted_client->public_key, reinterpret_cast<char*>(wanted_client->symmetric_key));
+				cout << encrypted_key;
+
+
+				//PushMessageRequest* request = encodePushReqKeyMessageRequest(uid, wanted_client->uid);
+				//writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
+				//PushMessageResponse* response = readServerPushMessageResponse(sock);
+
+				//delete request;
+				//delete response;
+			}
 			break;
+		}
 		case 0:
 			proceed_to_another_request = false;
 			break;

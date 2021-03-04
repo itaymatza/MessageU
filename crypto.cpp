@@ -1,3 +1,10 @@
+/**
+	Crypto - methods for encryption/decryption.
+	@file crypto.cpp
+	@author Itay Matza
+	@version 1.0
+*/
+
 #include <rsa.h>
 #include <osrng.h>
 #include <base64.h>
@@ -5,12 +12,17 @@
 #include <string>
 #include <fstream>
 #include "crypto.h"
+#include <modes.h>
+#include <aes.h>
+#include <filters.h>
+#include <iostream>
+#include <string>
+#include <immintrin.h>	// _rdrand32_step
 
-static const size_t KEYSIZE = 160;
 
 
-// Generate key pair (private and public), saves the private key to disk in base64 format and returns the public key
-void genRsaKeyPair(uint8_t public_key[])
+// Generate RSA key pair (private and public), saves the private key to disk in base64 format and returns the public key
+void genRsaKeyPair(uint8_t public_key[RSA_PUBLIC_KEYSIZE])
 {
 	// private key generation
 	CryptoPP::AutoSeededRandomPool rng;
@@ -35,32 +47,32 @@ void genRsaKeyPair(uint8_t public_key[])
 	CryptoPP::RSA::PublicKey pubKey;
 	pubKey.Load(bytes);
 
-	CryptoPP::ArraySink as(public_key, KEYSIZE);
+	CryptoPP::ArraySink as(public_key, RSA_PUBLIC_KEYSIZE);
 	pubKey.Save(as);
 }
 
 
 // Encrypt plain text string using RSA public key
-std::string encryptString(uint8_t public_key[], std::string plain_text)
+std::string encryptRsaString(uint8_t public_key[RSA_PUBLIC_KEYSIZE], std::string plaintext)
 {
 	CryptoPP::AutoSeededRandomPool rng;
 
 	// from uint8_t buffer to public key
-	CryptoPP::ArraySource as(public_key, KEYSIZE, true);
+	CryptoPP::ArraySource as(public_key, RSA_PUBLIC_KEYSIZE, true);
 	CryptoPP::RSA::PublicKey pubKey;
 	pubKey.Load(as);
 
 	// encrypt plain text
 	std::string ciphertext;
 	CryptoPP::RSAES_OAEP_SHA_Encryptor e(pubKey);
-	CryptoPP::StringSource ss(plain_text, true, new CryptoPP::PK_EncryptorFilter(rng, e, new CryptoPP::StringSink(ciphertext)));
+	CryptoPP::StringSource ss(plaintext, true, new CryptoPP::PK_EncryptorFilter(rng, e, new CryptoPP::StringSink(ciphertext)));
 
 	return ciphertext;
 }
 
 
 // Decrypt ciphertext string using RSA private key
-std::string decryptString(std::string private_key, std::string ciphertext)
+std::string decryptRsaString(std::string private_key, std::string ciphertext)
 {
 	CryptoPP::AutoSeededRandomPool rng;
 
@@ -78,4 +90,49 @@ std::string decryptString(std::string private_key, std::string ciphertext)
 	CryptoPP::StringSource ss(ciphertext, true, new CryptoPP::PK_DecryptorFilter(rng, d, new CryptoPP::StringSink(decrypted)));
 
 	return decrypted;
+}
+
+
+
+
+// Generates AES symmetric key into 16-byte uint8_t array.
+// AES encryption uses a secret key of  a variable length 128-bit.
+void genAesKey(uint8_t key[AES_KEYSIZE])
+{
+	memset(key, 0x00, AES_KEYSIZE);
+
+	for (size_t i = 0; i < AES_KEYSIZE; i += 4)
+		_rdrand32_step(reinterpret_cast<unsigned int*>(&key[i]));
+}
+
+// Encrypt plain text string using AES key
+std::string encryptAesString(uint8_t key[AES_KEYSIZE], std::string plaintext)
+{
+	std::string ciphertext;
+	uint8_t iv[AES_KEYSIZE];
+	memset(iv, 0x00, AES_KEYSIZE);
+	CryptoPP::AES::Encryption aesEncryption(key, AES_KEYSIZE);
+	CryptoPP::CBC_Mode_ExternalCipher::Encryption cbcEncryption(aesEncryption, iv);
+
+	CryptoPP::StreamTransformationFilter stfEncryptor(cbcEncryption, new CryptoPP::StringSink(ciphertext));
+	stfEncryptor.Put(reinterpret_cast<const unsigned char*>(plaintext.c_str()), plaintext.length());
+	stfEncryptor.MessageEnd();
+
+	return ciphertext;
+}
+
+// Decrypt ciphertext string using AES key
+std::string decryptAesString(uint8_t key[AES_KEYSIZE], std::string ciphertext)
+{
+	std::string decryptedtext;
+	uint8_t iv[AES_KEYSIZE];
+	memset(iv, 0x00, AES_KEYSIZE);
+	CryptoPP::AES::Decryption aesDecryption(key, AES_KEYSIZE);
+	CryptoPP::CBC_Mode_ExternalCipher::Decryption cbcDecryption(aesDecryption, iv);
+
+	CryptoPP::StreamTransformationFilter stfDecryptor(cbcDecryption, new CryptoPP::StringSink(decryptedtext));
+	stfDecryptor.Put(reinterpret_cast<const unsigned char*>(ciphertext.c_str()), ciphertext.size());
+	stfDecryptor.MessageEnd();
+
+	return decryptedtext;
 }

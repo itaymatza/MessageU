@@ -15,8 +15,9 @@ public:
 	std::string name;
 	uint8_t uid[16];
 	uint8_t public_key[160];
+	uint8_t symmetric_key[16];
 };
 
-bool getClientFromInput(Client* wanted_client, std::vector<Client*>* clients);
+bool getClientFromInput(Client** wanted_client, std::vector<Client*>* clients);
 
 #endif /* __CLIENT__ */
