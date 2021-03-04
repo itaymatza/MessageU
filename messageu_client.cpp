@@ -22,23 +22,23 @@ string error_msg("server responded with an error.");
 // MessageU-Client Main Function.
 int main() {
 	Status status = Status::proper;
-	string* ip = new string();
-	string* port = new string();
-	string* clien_name = new string();
+	string* server_ip = new string();
+	string* server_port = new string();
+	string* client_name = new string();
+	string* private_key = new string();
 	uint8_t uid[UID_LEN];
-	uint8_t public_key[PUBKEY_LEN];
-	vector<Client*>* clients = new vector<Client*>();
+	vector<Client*>* other_clients = new vector<Client*>();
 
-	getServerInfoFromFile(ip, port, &status);
-	getClientInfoFromFile(clien_name, uid, &status, public_key);
+	getServerInfoFromFile(server_ip, server_port, &status);
+	getClientInfoFromFile(client_name, uid, private_key, &status);
 
 	boost::asio::io_context io_context;
 	tcp::socket sock(io_context);
 	tcp::resolver resolver(io_context);
-	boost::asio::connect(sock, resolver.resolve(*ip, *port));
+	boost::asio::connect(sock, resolver.resolve(*server_ip, *server_port));
 
-	bool another_request = true;
-	while (another_request) {
+	bool proceed_to_another_request = true;
+	while (proceed_to_another_request) {
 		string input;
 		int option;
 
@@ -80,13 +80,14 @@ int main() {
 					getline(cin, username);
 				}
 
+				uint8_t public_key[PUBKEY_LEN];
 				GenRsaKeyPair(public_key);
 				request = encodeRegisterRequest(username, public_key);
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(RegisterRequest));
 				response = readServerRegisterResponse(sock);
 				writeMeInfoFile(username, response->payload.uid, &status);
 				cout << "Client registered successfully." << "\n" << endl;
-				getClientInfoFromFile(clien_name, uid, &status, public_key);
+				getClientInfoFromFile(client_name, uid, private_key, &status);
 				delete request;
 				delete response;
 			}
@@ -102,7 +103,7 @@ int main() {
 			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(ClientsListRequest));
 			cout << "MessageU - Clients list:" << endl;
 			cout << "--------------------" << endl;
-			response = readServerClientsListResponse(sock, clients);
+			response = readServerClientsListResponse(sock, other_clients);
 			cout << "--------------------" << endl;
 			cout << "End of Clients list." << "\n" << endl;
 			delete request;
@@ -118,7 +119,7 @@ int main() {
 			Client* wanted_client;
 			bool client_in_memory = false;
 
-			for (Client* client : *clients)
+			for (Client* client : *other_clients)
 			{
 				if (client_name == client->name)
 				{
@@ -151,7 +152,7 @@ int main() {
 			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PullMessagesRequest));
 			cout << "Pulling waiting messages:" << endl;
 			cout << "-------------------------" << endl;
-			response = readServerPullMessagesResponse(sock, clients);
+			response = readServerPullMessagesResponse(sock, other_clients);
 			cout << "----------------" << endl;
 			cout << "End of messages." << "\n" << endl;
 			delete request;
@@ -167,7 +168,7 @@ int main() {
 			Client* wanted_client;
 			bool client_in_memory = false;
 
-			for (Client* client : *clients)
+			for (Client* client : *other_clients)
 			{
 				if (client_name == client->name)
 				{
@@ -205,7 +206,7 @@ int main() {
 			cout << "Option 52" << endl;
 			break;
 		case 0:
-			another_request = false;
+			proceed_to_another_request = false;
 			break;
 		default:
 			cout << "Invalid input. \nEnter again - ";
@@ -213,6 +214,6 @@ int main() {
 
 		//if (system("CLS")) system("clear");
 	}
-	delete ip;
-	delete port;
+	delete server_ip;
+	delete server_port;
 }

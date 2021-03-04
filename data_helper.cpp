@@ -73,7 +73,7 @@ void HexStringTocharArray(string str, uint8_t* uid) {
 	If invalid info file format - output stream for errors and exit.
 	Writes the info to n and port string parameters.
 */
-void getClientInfoFromFile(string* clien_name, uint8_t* uid, Status* status, uint8_t public_key[]) {
+void getClientInfoFromFile(string* client_name, uint8_t* uid, string* private_key, Status* status) {
 
 	ifstream file("me.info");
 	if (file) {
@@ -86,9 +86,9 @@ void getClientInfoFromFile(string* clien_name, uint8_t* uid, Status* status, uin
 			key += buffer;
 		}
 
-		*clien_name = name;
+		*client_name = name;
 		HexStringTocharArray(uidstring, uid);
-		copy(key.begin(), key.begin() + PUBKEY_LEN, std::begin(key));
+		*private_key = key;
 		file.close();
 	}
 	else {
