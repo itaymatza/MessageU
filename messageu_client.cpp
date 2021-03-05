@@ -177,8 +177,8 @@ int main() {
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
 				writeRequestPayloadFromFile(sock, encrypted_file, getFileSize(encrypted_file));
 				PushMessageResponse* response = readServerPushMessageResponse(sock);
-				
 				//deleteFile(encrypted_file);
+				
 				delete request;
 				delete response;
 			}
