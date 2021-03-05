@@ -22,6 +22,7 @@ std::string writeReceivedPayloadToFile(boost::asio::ip::tcp::socket& sock, uint3
 std::string writeFileAsEncrypted(std::string filename, uint8_t symmetric_key[16]);
 std::string writeFileAsDecrypted(std::string filename, uint8_t symmetric_key[16]);
 bool createTmpDirectory();
+std::string genRandomString();
 void deleteFile(std::string filename);
 
 #endif /* __DATA_HELPER_H__ */

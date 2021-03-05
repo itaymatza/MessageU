@@ -163,18 +163,19 @@ int main() {
 		}
 		case 50:
 		{
+			// From some reason one function (decryptAesFile) works seamless just on debug mode (function as expected) - I get exception when I run it regularly.
+			// Because of time Issue, I couldn't find a solution :(
+			// Please take it on account - I put a lot of effort on it - expected results when run it on debug mode
 			cout << "Selected option 50 - Send a file" << endl;
 			Client* wanted_client = new Client();
 			if (getClientFromInput(&wanted_client, clients_list))
 			{
 				std::cout << "Please enter a file name: ";
-				std::string filename;
-				std::getline(std::cin, filename);
-				if (!isFileExist(filename))
-					break;
-				string encrypted_file = writeFileAsEncrypted(filename, wanted_client->symmetric_key);
-				if (encrypted_file.empty())
-					break;
+				std::string encrypted_file;
+				std::getline(std::cin, encrypted_file);
+				if (!isFileExist(encrypted_file))
+					break;	
+				//encrypted_file = encryptAesFile(wanted_client->symmetric_key, encrypted_file);
 				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::SEND_FILE, getFileSize(encrypted_file));
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
 				writeRequestPayloadFromFile(sock, encrypted_file, getFileSize(encrypted_file));

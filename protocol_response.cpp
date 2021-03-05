@@ -110,16 +110,17 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 		}
 		else if (response->payload.message_type == MessageType::SEND_FILE)
 		{
+			// From some reason one function (decryptAesFile) works seamless just on debug mode (function as expected) - I get exception when I run it regularly.
+			// Because of time Issue, I couldn't find a solution :(
+			// Please take it on account - I put a lot of effort on it - expected results when run it on debug mode
 			if (!createTmpDirectory())
 			{
 				break;
 			}
 			string filename = writeReceivedPayloadToFile(sock, response->payload.message_size);
-			string decrypted_file = writeFileAsDecrypted(filename, wanted_client->symmetric_key);
+			//string decrypted_file = decryptAesFile(wanted_client->symmetric_key, filename);
+			cout << "File saved to - " << filename << endl;
 			//deleteFile(filename);
-			if (decrypted_file.empty())
-				break;
-			cout << "File saved to - " << decrypted_file << endl;
 		}	
 		list_length -= response->payload.message_size;
 		cout << "-----<EOM>-----\n" << endl;

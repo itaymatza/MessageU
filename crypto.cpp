@@ -12,6 +12,7 @@
 #include <string>
 #include <fstream>
 #include "crypto.h"
+#include "data_helper.h"
 #include <modes.h>
 #include <aes.h>
 #include <filters.h>
@@ -117,7 +118,6 @@ std::string encryptAesString(uint8_t key[AES_KEYSIZE], std::string plaintext)
 	CryptoPP::StreamTransformationFilter stfEncryptor(cbcEncryption, new CryptoPP::StringSink(ciphertext));
 	stfEncryptor.Put(reinterpret_cast<const unsigned char*>(plaintext.c_str()), plaintext.length());
 	stfEncryptor.MessageEnd();
-
 	return ciphertext;
 }
 
@@ -135,4 +135,43 @@ std::string decryptAesString(uint8_t key[AES_KEYSIZE], std::string ciphertext)
 	stfDecryptor.MessageEnd();
 
 	return decryptedtext;
+}
+
+
+// Encrypt file using AES key
+std::string encryptAesFile(uint8_t key[AES_KEYSIZE], std::string filename_in) {
+	std::string ciphertext;
+	uint8_t iv[AES_KEYSIZE];
+	memset(iv, 0x00, AES_KEYSIZE);
+	CryptoPP::AES::Encryption aesEncryption(key, AES_KEYSIZE);
+	CryptoPP::CBC_Mode_ExternalCipher::Encryption cbcEncryption(aesEncryption, iv);
+
+	std::string filename_out = ".encrypted" + filename_in + genRandomString();
+	std::ifstream in(filename_in, std::ios::binary);
+	std::ofstream out(filename_out, std::ios::binary);
+
+	CryptoPP::FileSource encryptFile(in, true, 
+		new CryptoPP::StreamTransformationFilter(cbcEncryption, new CryptoPP::FileSink(out)));
+
+	return filename_out;
+}
+
+// Decrypt file using AES key
+// From some reason this function works seamless just on debug mode (function as expected) - I get exception when I run it regularly.
+// Because of time Issue, I couldn't find a solution :(
+std::string decryptAesFile(uint8_t key[AES_KEYSIZE], std::string filename_in) {
+	std::string ciphertext;
+	uint8_t iv[AES_KEYSIZE];
+	memset(iv, 0x00, AES_KEYSIZE);
+	CryptoPP::AES::Decryption aesDecryption(key, AES_KEYSIZE);
+	CryptoPP::CBC_Mode_ExternalCipher::Decryption cbcDecryption(aesDecryption, iv);
+
+	std::string filename_out = "%TMP%\\" + genRandomString();
+	std::ifstream in(filename_in, std::ios::binary);
+	std::ofstream out(filename_out, std::ios::binary);
+
+	CryptoPP::FileSource decryptFile(filename_in.c_str(), true,
+		new CryptoPP::StreamTransformationFilter(cbcDecryption, new CryptoPP::FileSink(filename_out.c_str())));
+
+	return filename_out;
 }

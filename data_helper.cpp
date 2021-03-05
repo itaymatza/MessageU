@@ -69,7 +69,6 @@ void HexStringTocharArray(string str, uint8_t* uid) {
 	}
 }
 
-
 /**
 	Reads client's name and uid from ./me.info file.
 	If invalid info file format - output stream for errors and exit.
@@ -134,7 +133,6 @@ void writeMeInfoFile(std::string username, uint8_t uid[16], Status* status) {
 	}
 }
 
-
 bool isFileExist(string filename) {
 	FILE* file;
 	if (!fopen_s(&file, filename.c_str(), "rb") && file != NULL) {
@@ -147,7 +145,6 @@ bool isFileExist(string filename) {
 	}
 }
 
-
 // Counts each char of the file
 uint32_t getFileSize(string file) {
 	ifstream in_file(file, ios::binary);
@@ -155,28 +152,6 @@ uint32_t getFileSize(string file) {
 	uint32_t file_size = in_file.tellg();
 	return file_size;
 }
-
-
-// Reads a file and writes to the given socket
-void writeRequestPayloadFromFile(boost::asio::ip::tcp::socket& sock, string filename, uint32_t total_size) {
-	FILE* file;
-	char* payload_buffer = (char*)malloc(CHUNK_SIZE);
-	if (!fopen_s(&file, filename.c_str(), "rb") && file != NULL && payload_buffer) {
-		size_t total_sent = 0;
-		while (total_sent < total_size) {
-			size_t size = min(static_cast<size_t>(CHUNK_SIZE), (total_size - total_sent));
-			size_t read = fread(payload_buffer, 1, size, file);
-			size_t sent = boost::asio::write(sock, boost::asio::buffer(payload_buffer, read));
-			total_sent += sent;
-		}
-		fclose(file);
-		free(payload_buffer);
-	}
-	else {
-		cerr << "Error: Unable to read payload file.\n";
-	}
-}
-
 
 bool createTmpDirectory() {
 	string dirname = "%TMP%";
@@ -205,6 +180,26 @@ string genRandomString() {
 	return tmp_s;
 }
 
+// Reads a file and writes to the given socket
+void writeRequestPayloadFromFile(boost::asio::ip::tcp::socket& sock, string filename, uint32_t total_size) {
+	FILE* file;
+	char* payload_buffer = (char*)malloc(CHUNK_SIZE);
+	if (!fopen_s(&file, filename.c_str(), "rb") && file != NULL && payload_buffer) {
+		size_t total_sent = 0;
+		while (total_sent < total_size) {
+			size_t size = min(static_cast<size_t>(CHUNK_SIZE), (total_size - total_sent));
+			size_t read = fread(payload_buffer, 1, size, file);
+			size_t sent = boost::asio::write(sock, boost::asio::buffer(payload_buffer, read));
+			total_sent += sent;
+		}
+		fclose(file);
+		free(payload_buffer);
+	}
+	else {
+		cerr << "Error: Unable to read payload file.\n";
+	}
+}
+
 string writeReceivedPayloadToFile(boost::asio::ip::tcp::socket& sock, uint32_t total_size) {
 	FILE* file;
 	string filename = "%TMP%\\" + genRandomString();
@@ -226,65 +221,6 @@ string writeReceivedPayloadToFile(boost::asio::ip::tcp::socket& sock, uint32_t t
 		return "Error: Unable to save the file.";
 	}
 }
-
-
-string writeFileAsEncrypted(std::string filename, uint8_t symmetric_key[16]) {
-	ifstream ifile(filename);
-	string ofilename = "";
-
-	if (ifile) {
-		string ofilename = ".encrypted" + filename + genRandomString();
-		
-		ofstream ofile(ofilename);
-		if (ofile) {
-			string buffer;
-			while (getline(ifile, buffer)) {
-				string ciphertext = encryptAesString(symmetric_key, buffer);
-				ofile << ciphertext << endl;
-			}
-			ofile.close();
-			return ofilename;
-		}
-		else {
-			cout << "Error: Unable to open and write encrypted file.\n";
-		}
-		ifile.close();
-	}
-	else {
-		cout << "Error: Unable to open " + filename + "file.\n";
-	}
-	return ofilename;
-}
-
-
-string writeFileAsDecrypted(std::string filename, uint8_t symmetric_key[16]) {
-	ifstream ifile(filename);
-	string ofilename = "";
-
-	if (ifile) {
-		string ofilename = "%TMP%\\" + genRandomString();
-
-		ofstream ofile(ofilename);
-		if (ofile) {
-			string buffer;
-			while (ifile >> buffer) {
-				string ciphertext = decryptAesString(symmetric_key, buffer);
-				ofile << ciphertext;
-			}
-			ofile.close();
-			return ofilename;
-		}
-		else {
-			cout << "Error: Unable to open and write encrypted file.\n";
-		}
-		ifile.close();
-	}
-	else {
-		cout << "Error: Unable to open " + filename + "file.\n";
-	}
-	return ofilename;
-}
-
 
 void deleteFile(string filename) {
 	std::wstring_convert< std::codecvt<wchar_t, char, std::mbstate_t> > conv;
