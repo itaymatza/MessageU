@@ -7,7 +7,6 @@
 #include <fstream>
 #include <iostream>
 #include "data_helper.h"
-#include <boost/asio.hpp>
 
 using namespace std;
 constexpr int PUBKEY_LEN = 160;
@@ -97,17 +96,6 @@ void getClientInfoFromFile(string* client_name, uint8_t* uid, string* private_ke
 	}
 }
 
-bool isFileExist(string filename) {
-	FILE* file;
-	if (!fopen_s(&file, filename.c_str(), "rb") && file != NULL) {
-		fclose(file);
-		return true;
-	}
-	else {
-		return false;
-	}
-}
-
 string charArrayToHexString(uint8_t ch[]) {
 	string out;
 	size_t length = sizeof(ch) * 2;
@@ -140,5 +128,49 @@ void writeMeInfoFile(std::string username, uint8_t uid[16], Status* status) {
 	else {
 		cerr << "Error: Unable to open and write me.info file.\n";
 		*status = Status::client_info_error;
+	}
+}
+
+
+bool isFileExist(string filename) {
+	FILE* file;
+	if (!fopen_s(&file, filename.c_str(), "rb") && file != NULL) {
+		fclose(file);
+		return true;
+	}
+	else {
+		cout << "Error: File not found." << endl;
+		return false;
+	}
+}
+
+
+// Counts each char of the file
+uint32_t getFileSize(string file) {
+	ifstream in_file(file, ios::binary);
+	in_file.seekg(0, ios::end);
+	uint32_t file_size = in_file.tellg();
+	return file_size;
+}
+
+
+// Reads a file and writes to the given socket
+void writeResponsePayloadFromFile(boost::asio::ip::tcp::socket& sock, string filename, uint32_t total_size) {
+	FILE* file;
+	constexpr int CHUNK_SIZE = 1024;
+	char* payload_buffer = (char*)malloc(CHUNK_SIZE);
+	if (!fopen_s(&file, filename.c_str(), "rb") && file != NULL && payload_buffer) {
+		size_t total_sent = 0;
+		while (total_sent < total_size) {
+			size_t size = min(static_cast<size_t>(CHUNK_SIZE), (total_size - total_sent));
+			size_t read = fread(payload_buffer, 1, size, file);
+			size_t sent = boost::asio::write(sock, boost::asio::buffer(payload_buffer, read));
+			total_sent += sent;
+		}
+		fclose(file);
+		free(payload_buffer);
+	}
+	else {
+		cerr << "Error: Unable to read payload file.\n";
 	}
 }

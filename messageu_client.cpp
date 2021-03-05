@@ -162,8 +162,26 @@ int main() {
 			break;
 		}
 		case 50:
-			cout << "Option 50" << endl;
+		{
+			cout << "Selected option 50 - Send a file" << endl;
+			Client* wanted_client = new Client();
+			if (getClientFromInput(&wanted_client, clients_list))
+			{
+				std::cout << "Please enter a file name: ";
+				std::string filename;
+				std::getline(std::cin, filename);
+				if (!isFileExist(filename))
+					break;
+				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::SEND_FILE, getFileSize(filename));
+				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
+				writeResponsePayloadFromFile(sock, filename, getFileSize(filename));
+				PushMessageResponse* response = readServerPushMessageResponse(sock);
+
+				delete request;
+				delete response;
+			}
 			break;
+		}
 		case 51:
 		{
 			cout << "Selected option 51 - Send a request for symmetric key" << endl;
