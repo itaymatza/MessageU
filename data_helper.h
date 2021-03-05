@@ -17,6 +17,8 @@ void getClientInfoFromFile(std::string* client_name, uint8_t* uid, std::string* 
 void writeMeInfoFile(std::string username, uint8_t uid[16], Status* status);
 bool isFileExist(std::string filename);
 uint32_t getFileSize(std::string file);
-void writeResponsePayloadFromFile(boost::asio::ip::tcp::socket& sock, std::string filename, uint32_t total_size);
+void writeRequestPayloadFromFile(boost::asio::ip::tcp::socket& sock, std::string filename, uint32_t total_size);
+std::string writeReceivedPayloadToFile(boost::asio::ip::tcp::socket& sock, uint32_t total_size);
+bool createTmpDirectory();
 
 #endif /* __DATA_HELPER_H__ */

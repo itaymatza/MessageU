@@ -6,10 +6,12 @@
 */
 #include <fstream>
 #include <iostream>
+#include <locale>
 #include "data_helper.h"
 
 using namespace std;
 constexpr int PUBKEY_LEN = 160;
+constexpr int CHUNK_SIZE = 1024;
 
 // Checks and returns if a given string is a number representation.
 bool is_number(const std::string& s)
@@ -155,9 +157,8 @@ uint32_t getFileSize(string file) {
 
 
 // Reads a file and writes to the given socket
-void writeResponsePayloadFromFile(boost::asio::ip::tcp::socket& sock, string filename, uint32_t total_size) {
+void writeRequestPayloadFromFile(boost::asio::ip::tcp::socket& sock, string filename, uint32_t total_size) {
 	FILE* file;
-	constexpr int CHUNK_SIZE = 1024;
 	char* payload_buffer = (char*)malloc(CHUNK_SIZE);
 	if (!fopen_s(&file, filename.c_str(), "rb") && file != NULL && payload_buffer) {
 		size_t total_sent = 0;
@@ -172,5 +173,55 @@ void writeResponsePayloadFromFile(boost::asio::ip::tcp::socket& sock, string fil
 	}
 	else {
 		cerr << "Error: Unable to read payload file.\n";
+	}
+}
+
+
+bool createTmpDirectory() {
+	string dirname = "%TMP%";
+	std::wstring_convert< std::codecvt<wchar_t, char, std::mbstate_t> > conv;
+	std::wstring wstr = conv.from_bytes(dirname); // proper dirname type for CreateDirectory function
+	if (!CreateDirectory(wstr.c_str(), NULL) && ERROR_ALREADY_EXISTS != GetLastError()) {
+		cout << "Error: Couldn't create " << dirname << " directory.\n";
+		return false;
+	}
+	return true;
+}
+
+
+string genRandomString() {
+	string tmp_s;
+	int len = 32;
+	static const char alphanum[] = //all chars for random string
+		"0123456789"
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		"abcdefghijklmnopqrstuvwxyz";
+
+	srand((unsigned)time(NULL) * _getpid());
+	tmp_s.reserve(len);
+	for (int i = 0; i < len; ++i)
+		tmp_s += alphanum[rand() % (sizeof(alphanum) - 1)];
+	return tmp_s;
+}
+
+string writeReceivedPayloadToFile(boost::asio::ip::tcp::socket& sock, uint32_t total_size) {
+	FILE* file;
+	string filename = "%TMP%" "\\" + genRandomString();
+	char* payload_buffer = (char*)malloc(CHUNK_SIZE);
+	if (!fopen_s(&file, filename.c_str(), "wb") && file != NULL && payload_buffer) {
+		size_t payload_length = 0;
+		while (payload_length < total_size) {
+			size_t size = min(static_cast<size_t>(CHUNK_SIZE), (total_size - payload_length));
+			size_t received = boost::asio::read(sock, boost::asio::buffer(payload_buffer, size));
+			payload_length += received;
+			fwrite(payload_buffer, 1, received, file);
+			fflush(file);
+		};
+		fclose(file);
+		free(payload_buffer);
+		return filename;
+	}
+	else {
+		return "Error: Unable to save the file.";
 	}
 }

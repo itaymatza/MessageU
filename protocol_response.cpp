@@ -6,6 +6,7 @@
 */
 
 #include "protocol_response.h"
+#include "data_helper.h"
 using namespace std;
 using boost::asio::ip::tcp;
 constexpr int CHUNK_SIZE = 1024;
@@ -66,10 +67,6 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 		boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(PullMessagesResponsePayload)));
 		list_length -= sizeof(PullMessagesResponsePayload);
 
-		vector<char> message(response->payload.message_size);
-		boost::asio::read(sock, boost::asio::buffer(message, response->payload.message_size));
-		list_length -= response->payload.message_size;
-
 		cout << "From:\t";
 		bool client_in_memory = false;
 		Client* wanted_client = new Client();
@@ -88,22 +85,39 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 			cout << "Error to fetch user name - the user name is not in memory" << endl;
 		}
 		cout << "Content:" << endl;
-		std::string ciphertext(message.begin(), message.end());
 		if (response->payload.message_type == MessageType::REQUEST_FOR_SYMMETRIC_KEY)
 		{
 			cout << "Request for symmetric key." << endl;
 		}
 		else if (response->payload.message_type == MessageType::SYMMETRIC_KEY)
 		{
+			vector<char> message(response->payload.message_size);
+			boost::asio::read(sock, boost::asio::buffer(message, response->payload.message_size));
+			std::string ciphertext(message.begin(), message.end());
+
 			cout << "Symmetric key received." << endl;
 			string decrypted_symmetric_key = decryptRsaString(*private_key, ciphertext);
 			copy(decrypted_symmetric_key.begin(), decrypted_symmetric_key.begin() + AES_KEYSIZE, std::begin(wanted_client->symmetric_key));
 		}
 		else if (response->payload.message_type == MessageType::TEXT_MESSAGE)
 		{
-			string message = decryptAesString(wanted_client->symmetric_key, ciphertext);
-			cout << message << endl;
+			vector<char> message(response->payload.message_size);
+			boost::asio::read(sock, boost::asio::buffer(message, response->payload.message_size));
+			std::string ciphertext(message.begin(), message.end());
+
+			string decrypted = decryptAesString(wanted_client->symmetric_key, ciphertext);
+			cout << decrypted << endl;
 		}
+		else if (response->payload.message_type == MessageType::SEND_FILE)
+		{
+			if (!createTmpDirectory())
+			{
+				break;
+			}
+			string filename = writeReceivedPayloadToFile(sock, response->payload.message_size);
+			cout << "File saved to - " << filename << endl;
+		}	
+		list_length -= response->payload.message_size;
 		cout << "-----<EOM>-----\n" << endl;
 	}
 	return response;

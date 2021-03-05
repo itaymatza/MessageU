@@ -174,7 +174,7 @@ int main() {
 					break;
 				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::SEND_FILE, getFileSize(filename));
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
-				writeResponsePayloadFromFile(sock, filename, getFileSize(filename));
+				writeRequestPayloadFromFile(sock, filename, getFileSize(filename));
 				PushMessageResponse* response = readServerPushMessageResponse(sock);
 
 				delete request;
