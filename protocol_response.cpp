@@ -110,9 +110,8 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 		}
 		else if (response->payload.message_type == MessageType::SEND_FILE)
 		{
-			// From some reason one function (decryptAesFile) works seamless just on debug mode (function as expected) - I get exception when I run it regularly.
-			// Because of time Issue, I couldn't find a solution :(
-			// Please take it on account - I put a lot of effort on it - expected results when run it on debug mode
+			// From some reason one function (decryptAesFile) works seamless with expected results just on debug mode
+			// I get exception when I run it regularly. Because of time Issue, I couldn't find a solution
 			if (!createTmpDirectory())
 			{
 				break;

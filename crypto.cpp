@@ -157,8 +157,9 @@ std::string encryptAesFile(uint8_t key[AES_KEYSIZE], std::string filename_in) {
 }
 
 // Decrypt file using AES key
-// From some reason this function works seamless just on debug mode (function as expected) - I get exception when I run it regularly.
-// Because of time Issue, I couldn't find a solution :(
+// From some reason this function works seamless with expected results just on debug mode
+// I get exception when I run it regularly. Because of time Issue, I couldn't find a solution
+// Please take it on account - I put a lot of effort on it - expected results when run it on debug mode
 std::string decryptAesFile(uint8_t key[AES_KEYSIZE], std::string filename_in) {
 	std::string ciphertext;
 	uint8_t iv[AES_KEYSIZE];
