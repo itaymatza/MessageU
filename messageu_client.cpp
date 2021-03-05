@@ -172,11 +172,15 @@ int main() {
 				std::getline(std::cin, filename);
 				if (!isFileExist(filename))
 					break;
-				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::SEND_FILE, getFileSize(filename));
+				string encrypted_file = writeFileAsEncrypted(filename, wanted_client->symmetric_key);
+				if (encrypted_file.empty())
+					break;
+				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::SEND_FILE, getFileSize(encrypted_file));
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
-				writeRequestPayloadFromFile(sock, filename, getFileSize(filename));
+				writeRequestPayloadFromFile(sock, encrypted_file, getFileSize(encrypted_file));
 				PushMessageResponse* response = readServerPushMessageResponse(sock);
-
+				
+				deleteFile(encrypted_file);
 				delete request;
 				delete response;
 			}

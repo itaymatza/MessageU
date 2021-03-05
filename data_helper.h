@@ -19,6 +19,9 @@ bool isFileExist(std::string filename);
 uint32_t getFileSize(std::string file);
 void writeRequestPayloadFromFile(boost::asio::ip::tcp::socket& sock, std::string filename, uint32_t total_size);
 std::string writeReceivedPayloadToFile(boost::asio::ip::tcp::socket& sock, uint32_t total_size);
+std::string writeFileAsEncrypted(std::string filename, uint8_t symmetric_key[16]);
+std::string writeFileAsDecrypted(std::string filename, uint8_t symmetric_key[16]);
 bool createTmpDirectory();
+void deleteFile(std::string filename);
 
 #endif /* __DATA_HELPER_H__ */

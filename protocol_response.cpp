@@ -115,7 +115,11 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 				break;
 			}
 			string filename = writeReceivedPayloadToFile(sock, response->payload.message_size);
-			cout << "File saved to - " << filename << endl;
+			string decrypted_file = writeFileAsDecrypted(filename, wanted_client->symmetric_key);
+			//deleteFile(filename);
+			if (decrypted_file.empty())
+				break;
+			cout << "File saved to - " << decrypted_file << endl;
 		}	
 		list_length -= response->payload.message_size;
 		cout << "-----<EOM>-----\n" << endl;

