@@ -125,5 +125,6 @@ ClientsListResponse* readServerClientsListResponse(boost::asio::ip::tcp::socket&
 PublicKeyResponse* readServerPublicKeyResponse(boost::asio::ip::tcp::socket& sock, Client* client);
 PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients, std::string* private_key);
 PushMessageResponse* readServerPushMessageResponse(boost::asio::ip::tcp::socket& sock);
+bool isServerRespondedWithError(uint16_t code);
 
 #endif /* __PROTOCOL_RESPNSE_H__ */

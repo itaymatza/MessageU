@@ -16,7 +16,7 @@
 using namespace std;
 using boost::asio::ip::tcp;
 string welcome_msg("MessageU client at your service.");
-string error_msg("server responded with an error.");
+string client_info_file("me.info");
 
 
 // MessageU-Client Main Function.
@@ -67,28 +67,31 @@ int main() {
 		case 1:
 		{
 			cout << "Selected option 1 - Register" << endl;
-			if (isFileExist("me.info")) {
-				cout << "me.info file is already exists." << "\n" << endl;
+			if (isFileExist(client_info_file)) {
+				cout << client_info_file << " file is already exists." << "\n" << endl;
+				break;
 			}
-			else {
-				string username;
-				while (username.empty()) {
-					cout << "Please enter new user name: ";
-					getline(cin, username);
-				}
+			string username;
+			while (username.empty()) {
+				cout << "Please enter new user name: ";
+				getline(cin, username);
+			}
 
-				uint8_t public_key[PUBKEY_LEN];
-				genRsaKeyPair(public_key);
-				RegisterRequest* request = encodeRegisterRequest(username, public_key);
-				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(RegisterRequest));
-				RegisterResponse* response = readServerRegisterResponse(sock);
+			uint8_t public_key[PUBKEY_LEN];
+			genRsaKeyPair(public_key);
+			RegisterRequest* request = encodeRegisterRequest(username, public_key);
+			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(RegisterRequest));
+				
+			RegisterResponse* response = readServerRegisterResponse(sock);
+			if (isServerRespondedWithError(response->header.code)) {
+				deleteFile(client_info_file);
+			} else {
 				writeMeInfoFile(username, response->payload.uid, &status);
 				cout << "Client registered successfully." << "\n" << endl;
 				getClientInfoFromFile(client_name, uid, private_key, &status);
-
-				delete request;
-				delete response;
 			}
+			delete request;
+			delete response;
 			break;
 		}
 		case 2:
@@ -100,9 +103,10 @@ int main() {
 			cout << "MessageU - Clients list:" << endl;
 			cout << "--------------------" << endl;
 			ClientsListResponse* response = readServerClientsListResponse(sock, clients_list);
-			cout << "--------------------" << endl;
-			cout << "End of Clients list." << "\n" << endl;
-
+			if (isServerRespondedWithError(response->header.code) == false) {
+				cout << "--------------------" << endl;
+				cout << "End of Clients list." << "\n" << endl;
+			}
 			delete request;
 			delete response;
 			break;
@@ -116,10 +120,8 @@ int main() {
 			{
 				PublicKeyRequest* request = encodePublicKeyRequest(uid, wanted_client->uid);
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PublicKeyRequest));
-				PublicKeyResponse* response = readServerPublicKeyResponse(sock, wanted_client);
-
+				readServerPublicKeyResponse(sock, wanted_client);
 				delete request;
-				delete response;
 			}
 			break;
 		}
@@ -132,9 +134,10 @@ int main() {
 			cout << "Pulling waiting messages:" << endl;
 			cout << "-------------------------" << endl;
 			PullMessagesResponse* response = readServerPullMessagesResponse(sock, clients_list, private_key);
-			cout << "-------------------------" << endl;
-			cout << "End of messages." << "\n" << endl;
-
+			if (isServerRespondedWithError(response->header.code) == false) {
+				cout << "-------------------------" << endl;
+				cout << "End of messages." << "\n" << endl;
+			}
 			delete request;
 			delete response;
 			break;
@@ -154,10 +157,8 @@ int main() {
 				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::TEXT_MESSAGE, ciphertext.length());
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
 				boost::asio::write(sock, boost::asio::buffer(ciphertext, ciphertext.size()));
-				PushMessageResponse* response = readServerPushMessageResponse(sock);
-
+				readServerPushMessageResponse(sock);
 				delete request;
-				delete response;
 			}
 			break;
 		}
@@ -176,11 +177,9 @@ int main() {
 				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::SEND_FILE, getFileSize(encrypted_file));
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
 				writeRequestPayloadFromFile(sock, encrypted_file, getFileSize(encrypted_file));
-				PushMessageResponse* response = readServerPushMessageResponse(sock);
-				
+				readServerPushMessageResponse(sock);
 				deleteFile(encrypted_file);
 				delete request;
-				delete response;
 			}
 			break;
 		}
@@ -193,10 +192,8 @@ int main() {
 			{
 				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::REQUEST_FOR_SYMMETRIC_KEY, 0);
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
-				PushMessageResponse* response = readServerPushMessageResponse(sock);
-
+				readServerPushMessageResponse(sock);
 				delete request;
-				delete response;
 			}
 			break;
 		}
@@ -213,10 +210,8 @@ int main() {
 				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::SYMMETRIC_KEY, encrypted_symmetric_key.size());
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
 				boost::asio::write(sock, boost::asio::buffer(encrypted_symmetric_key, encrypted_symmetric_key.size()));
-				PushMessageResponse* response = readServerPushMessageResponse(sock);
-
+				readServerPushMessageResponse(sock);
 				delete request;
-				delete response;
 			}
 			break;
 		}

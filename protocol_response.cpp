@@ -7,30 +7,34 @@
 
 #include "protocol_response.h"
 #include "data_helper.h"
+
 using namespace std;
 using boost::asio::ip::tcp;
+
 constexpr int CHUNK_SIZE = 1024;
+string ERROR_MSG("server responded with an error.\n");
 
 
-void printVector(std::vector<char> const& input)
-{
-	for (int i = 0; i < input.size(); i++) {
-		cout << input.at(i);
-	}
-	cout << endl;
+// Reads response header from socket, return false if server responds with general error
+bool readResponseHeader(tcp::socket& sock, ResponseHeader* response_header) {
+	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(response_header), sizeof(ResponseHeader)));
+	if (response_header->code == ResponseCode::GENERAL_ERROR)
+		return false;
+	return true;
 }
 
 
 RegisterResponse* readServerRegisterResponse(tcp::socket& sock) {
 	RegisterResponse* response = new RegisterResponse;
-	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->header), sizeof(ResponseHeader)));
-	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(RegisterResponsePayload)));
+	if (readResponseHeader(sock, &response->header))
+		boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(RegisterResponsePayload)));
 	return response;
 }
 
 ClientsListResponse* readServerClientsListResponse(tcp::socket& sock, vector<Client*>* clients) {
 	ClientsListResponse* response = new ClientsListResponse;
-	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->header), sizeof(ResponseHeader)));
+	if (readResponseHeader(sock, &response->header) == false)
+		return response;
 
 	size_t list_length = response->header.payoad_size / sizeof(ClientsListResponsePayload);
 	while (0 < list_length)
@@ -50,16 +54,21 @@ ClientsListResponse* readServerClientsListResponse(tcp::socket& sock, vector<Cli
 
 PublicKeyResponse* readServerPublicKeyResponse(boost::asio::ip::tcp::socket& sock, Client* client) {
 	PublicKeyResponse* response = new PublicKeyResponse;
-	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->header), sizeof(ResponseHeader)));
-	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(PublicKeyResponsePayload)));
-	memcpy(client->public_key, response->payload.public_key, sizeof(client->public_key));
+	if (readResponseHeader(sock, &response->header)) {
+		boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(PublicKeyResponsePayload)));
+		memcpy(client->public_key, response->payload.public_key, sizeof(client->public_key));
+	}
+	else {
+		cout << ERROR_MSG << endl;
+	}
 	return response;
 }
 
 
 PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socket& sock, std::vector<Client*>* clients, string* private_key) {
 	PullMessagesResponse* response = new PullMessagesResponse;
-	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->header), sizeof(ResponseHeader)));
+	if (readResponseHeader(sock, &response->header) == false)
+		return response;
 
 	size_t list_length = response->header.payoad_size;
 	while (0 < list_length)
@@ -127,7 +136,19 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 
 PushMessageResponse* readServerPushMessageResponse(boost::asio::ip::tcp::socket& sock) {
 	PushMessageResponse* response = new PushMessageResponse;
-	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->header), sizeof(ResponseHeader)));
-	boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(PushMessageResponsePayload)));
+	if (readResponseHeader(sock, &response->header))
+		boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(PushMessageResponsePayload)));
+	else
+		cout << ERROR_MSG << endl;
 	return response;
+}
+
+bool isServerRespondedWithError(uint16_t code)
+{
+	if (code == ResponseCode::GENERAL_ERROR)
+	{
+		cout << ERROR_MSG << endl;
+		return true;
+	}
+	return false;
 }
