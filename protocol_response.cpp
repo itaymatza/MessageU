@@ -44,7 +44,9 @@ ClientsListResponse* readServerClientsListResponse(tcp::socket& sock, vector<Cli
 		string str(reinterpret_cast<char*>(&response->payload.client_name));
 		client->name = str;
 		memcpy(client->uid, response->payload.uid, sizeof(client->uid));
-		clients->push_back(client);
+		if (needToAddToClientsList(client, *clients)) {
+			clients->push_back(client);
+		}
 		cout << client->name << endl;
 		list_length -= 1;
 	}
