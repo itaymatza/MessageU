@@ -153,6 +153,8 @@ std::string encryptAesFile(uint8_t key[AES_KEYSIZE], std::string filename_in) {
 	CryptoPP::FileSource encryptFile(in, true, 
 		new CryptoPP::StreamTransformationFilter(cbcEncryption, new CryptoPP::FileSink(out)));
 
+	in.close();
+	out.close();
 	return filename_out;
 }
 
@@ -171,8 +173,10 @@ std::string decryptAesFile(uint8_t key[AES_KEYSIZE], std::string filename_in) {
 	std::ifstream in(filename_in, std::ios::binary);
 	std::ofstream out(filename_out, std::ios::binary);
 
-	CryptoPP::FileSource decryptFile(filename_in.c_str(), true,
-		new CryptoPP::StreamTransformationFilter(cbcDecryption, new CryptoPP::FileSink(filename_out.c_str())));
+	CryptoPP::FileSource decryptFile(in, true,
+		new CryptoPP::StreamTransformationFilter(cbcDecryption, new CryptoPP::FileSink(out)));
 
+	in.close();
+	out.close();
 	return filename_out;
 }
