@@ -95,6 +95,7 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 		{
 			cout << "Error to fetch user name - the user name is not in memory" << endl;
 		}
+
 		cout << "Content:" << endl;
 		if (response->payload.message_type == MessageType::REQUEST_FOR_SYMMETRIC_KEY)
 		{
@@ -102,33 +103,54 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 		}
 		else if (response->payload.message_type == MessageType::SYMMETRIC_KEY)
 		{
-			vector<char> message(response->payload.message_size);
-			boost::asio::read(sock, boost::asio::buffer(message, response->payload.message_size));
-			std::string ciphertext(message.begin(), message.end());
-
 			cout << "Symmetric key received." << endl;
-			string decrypted_symmetric_key = decryptRsaString(*private_key, ciphertext);
-			copy(decrypted_symmetric_key.begin(), decrypted_symmetric_key.begin() + AES_KEYSIZE, std::begin(wanted_client->symmetric_key));
+			try
+			{
+				vector<char> message(response->payload.message_size);
+				boost::asio::read(sock, boost::asio::buffer(message, response->payload.message_size));
+				std::string ciphertext(message.begin(), message.end());
+
+				string decrypted_symmetric_key = decryptRsaString(*private_key, ciphertext);
+				copy(decrypted_symmetric_key.begin(), decrypted_symmetric_key.begin() + AES_KEYSIZE, std::begin(wanted_client->symmetric_key));
+			}
+			catch (...)
+			{
+				cout << "Exception in symmetric decryption!" << endl;
+			}
 		}
 		else if (response->payload.message_type == MessageType::TEXT_MESSAGE)
 		{
-			vector<char> message(response->payload.message_size);
-			boost::asio::read(sock, boost::asio::buffer(message, response->payload.message_size));
-			std::string ciphertext(message.begin(), message.end());
+			try
+			{
+				vector<char> message(response->payload.message_size);
+				boost::asio::read(sock, boost::asio::buffer(message, response->payload.message_size));
+				std::string ciphertext(message.begin(), message.end());
 
-			string decrypted = decryptAesString(wanted_client->symmetric_key, ciphertext);
-			cout << decrypted << endl;
+				string decrypted = decryptAesString(wanted_client->symmetric_key, ciphertext);
+				cout << decrypted << endl;
+			}
+			catch (...)
+			{
+				cout << "Exception in text message decryption!" << endl;
+			}
 		}
 		else if (response->payload.message_type == MessageType::SEND_FILE)
 		{
-			if (!createTmpDirectory())
+			try
 			{
-				break;
+				if (!createTmpDirectory())
+				{
+					break;
+				}
+				string filename = writeReceivedPayloadToFile(sock, response->payload.message_size);
+				string decrypted_file = decryptAesFile(wanted_client->symmetric_key, filename);
+				cout << "File saved to - " << decrypted_file << endl;
+				deleteFile(filename);
 			}
-			string filename = writeReceivedPayloadToFile(sock, response->payload.message_size);
-			string decrypted_file = decryptAesFile(wanted_client->symmetric_key, filename);
-			cout << "File saved to - " << decrypted_file << endl;
-			deleteFile(filename);
+			catch (...)
+			{
+				cout << "Exception in file decryption!" << endl;
+			}
 		}	
 		list_length -= response->payload.message_size;
 		cout << "-----<EOM>-----\n" << endl;

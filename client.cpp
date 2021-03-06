@@ -1,7 +1,6 @@
 #include "client.h"
 #include <iostream>
 
-
 bool getClientFromInput(Client** wanted_client, std::vector<Client*>* clients) {
 	std::cout << "Please enter a client name: ";
 	std::string client_name;
