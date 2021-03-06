@@ -159,9 +159,6 @@ std::string encryptAesFile(uint8_t key[AES_KEYSIZE], std::string filename_in) {
 }
 
 // Decrypt file using AES key
-// From some reason this function works seamless with expected results just on debug mode
-// I get exception when I run it regularly. Because of time Issue, I couldn't find a solution
-// Please take it on account - I put a lot of effort on it - expected results when run it on debug mode
 std::string decryptAesFile(uint8_t key[AES_KEYSIZE], std::string filename_in) {
 	std::string ciphertext;
 	uint8_t iv[AES_KEYSIZE];
@@ -173,8 +170,7 @@ std::string decryptAesFile(uint8_t key[AES_KEYSIZE], std::string filename_in) {
 	std::ifstream in(filename_in, std::ios::binary);
 	std::ofstream out(filename_out, std::ios::binary);
 
-	CryptoPP::FileSource decryptFile(in, true,
-		new CryptoPP::StreamTransformationFilter(cbcDecryption, new CryptoPP::FileSink(out)));
+	CryptoPP::FileSource decryptFile(in, true, new CryptoPP::StreamTransformationFilter(cbcDecryption, new CryptoPP::FileSink(out)));
 
 	in.close();
 	out.close();

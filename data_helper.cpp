@@ -4,6 +4,8 @@
 	@author Itay Matza
 	@version 1.0
 */
+
+#include <random>
 #include <fstream>
 #include <iostream>
 #include <locale>
@@ -166,18 +168,14 @@ bool createTmpDirectory() {
 
 
 string genRandomString() {
-	string tmp_s;
-	int len = 32;
-	static const char alphanum[] = //all chars for random string
-		"0123456789"
-		"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-		"abcdefghijklmnopqrstuvwxyz";
+	std::string str("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
 
-	srand((unsigned)time(NULL) * _getpid());
-	tmp_s.reserve(len);
-	for (int i = 0; i < len; ++i)
-		tmp_s += alphanum[rand() % (sizeof(alphanum) - 1)];
-	return tmp_s;
+	std::random_device rd;
+	std::mt19937 generator(rd());
+
+	std::shuffle(str.begin(), str.end(), generator);
+
+	return str.substr(0, 32);    // assumes 32 < number of characters in str      
 }
 
 // Reads a file and writes to the given socket

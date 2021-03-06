@@ -167,18 +167,18 @@ int main() {
 			Client* wanted_client = new Client();
 			if (getClientFromInput(&wanted_client, clients_list))
 			{
-				std::cout << "Please enter a file name: ";
-				std::string encrypted_file;
-				std::getline(std::cin, encrypted_file);
-				if (!isFileExist(encrypted_file))
+				cout << "Please enter a file name: ";
+				string file;
+				getline(std::cin, file);
+				if (!isFileExist(file))
 					break;	
-				//encrypted_file = encryptAesFile(wanted_client->symmetric_key, encrypted_file);
+				string encrypted_file = encryptAesFile(wanted_client->symmetric_key, file);
 				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::SEND_FILE, getFileSize(encrypted_file));
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
 				writeRequestPayloadFromFile(sock, encrypted_file, getFileSize(encrypted_file));
 				PushMessageResponse* response = readServerPushMessageResponse(sock);
-				//deleteFile(encrypted_file);
 				
+				deleteFile(encrypted_file);
 				delete request;
 				delete response;
 			}
