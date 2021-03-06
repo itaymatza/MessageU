@@ -17,6 +17,7 @@ using namespace std;
 using boost::asio::ip::tcp;
 string welcome_msg("MessageU client at your service.");
 string client_info_file("me.info");
+string server_info_file("server.info");
 
 
 // MessageU-Client Main Function.
@@ -29,8 +30,8 @@ int main() {
 	uint8_t uid[UID_LEN];
 	vector<Client*>* clients_list = new vector<Client*>();
 
-	getServerInfoFromFile(server_ip, server_port, &status);
-	getClientInfoFromFile(client_name, uid, private_key, &status);
+	getServerInfoFromFile(server_ip, server_port, &status, server_info_file);
+	getClientInfoFromFile(client_name, uid, private_key, &status, client_info_file);
 
 	boost::asio::io_context io_context;
 	tcp::socket sock(io_context);
@@ -78,17 +79,17 @@ int main() {
 			}
 
 			uint8_t public_key[PUBKEY_LEN];
-			genRsaKeyPair(public_key);
+			genRsaKeyPair(public_key, client_info_file);
 			RegisterRequest* request = encodeRegisterRequest(username, public_key);
 			writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(RegisterRequest));
-				
+
 			RegisterResponse* response = readServerRegisterResponse(sock);
 			if (isServerRespondedWithError(response->header.code)) {
 				deleteFile(client_info_file);
 			} else {
 				writeMeInfoFile(username, response->payload.uid, &status);
 				cout << "Client registered successfully." << "\n" << endl;
-				getClientInfoFromFile(client_name, uid, private_key, &status);
+				getClientInfoFromFile(client_name, uid, private_key, &status, client_info_file);
 			}
 			delete request;
 			delete response;

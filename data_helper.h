@@ -12,15 +12,13 @@
 
 enum class Status { server_info_error = -10, client_info_error, proper = 0 };
 
-void getServerInfoFromFile(std::string* ip_address, std::string* port_number, Status* status);
-void getClientInfoFromFile(std::string* client_name, uint8_t* uid, std::string* private_key, Status* status);
+void getServerInfoFromFile(std::string* ip_address, std::string* port_number, Status* status, std::string info_file);
+void getClientInfoFromFile(std::string* client_name, uint8_t* uid, std::string* private_key, Status* status, std::string info_file);
 void writeMeInfoFile(std::string username, uint8_t uid[16], Status* status);
 bool isFileExist(std::string filename);
 uint32_t getFileSize(std::string file);
 void writeRequestPayloadFromFile(boost::asio::ip::tcp::socket& sock, std::string filename, uint32_t total_size);
 std::string writeReceivedPayloadToFile(boost::asio::ip::tcp::socket& sock, uint32_t total_size);
-std::string writeFileAsEncrypted(std::string filename, uint8_t symmetric_key[16]);
-std::string writeFileAsDecrypted(std::string filename, uint8_t symmetric_key[16]);
 bool createTmpDirectory();
 std::string genRandomString();
 void deleteFile(std::string filename);

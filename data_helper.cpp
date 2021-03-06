@@ -30,9 +30,9 @@ bool is_number(const std::string& s)
 	If invalid info file format or port number - output stream for errors and exit.
 	Writes the info to ip and port string parameters.
 */
-void getServerInfoFromFile(string* ip, string* port, Status* status){
+void getServerInfoFromFile(string* ip, string* port, Status* status, string info_file){
 
-	ifstream file("server.info");
+	ifstream file(info_file);
 	if (file) {
 		string info, is_end_of_file;
 
@@ -76,13 +76,13 @@ void HexStringTocharArray(string str, uint8_t* uid) {
 	If invalid info file format - output stream for errors and exit.
 	Writes the info to n and port string parameters.
 */
-void getClientInfoFromFile(string* client_name, uint8_t* uid, string* private_key, Status* status) {
+void getClientInfoFromFile(string* client_name, uint8_t* uid, string* private_key, Status* status, string info_file) {
 
-	ifstream file("me.info");
+	ifstream file(info_file);
 	if (file) {
 		string name, uidstring, key, buffer;
 		if (!getline(file, name) || !getline(file, uidstring) || !getline(file, key)) {
-			cerr << "Error: Illegal me.info file.\n";
+			cerr << "Error: Illegal " << info_file << " file.\n";
 			*status = Status::client_info_error;
 		}
 		while (file >> buffer) {
@@ -95,7 +95,7 @@ void getClientInfoFromFile(string* client_name, uint8_t* uid, string* private_ke
 		file.close();
 	}
 	else {
-		cerr << "Error: Unable to open me.info file.\n";
+		cerr << "Error: Unable to open " << info_file << " file.\n";
 		*status = Status::client_info_error;
 	}
 }

@@ -23,13 +23,13 @@
 
 
 // Generate RSA key pair (private and public), saves the private key to disk in base64 format and returns the public key
-void genRsaKeyPair(uint8_t public_key[RSA_PUBLIC_KEYSIZE])
+void genRsaKeyPair(uint8_t public_key[RSA_PUBLIC_KEYSIZE], std::string file)
 {
 	// private key generation
 	CryptoPP::AutoSeededRandomPool rng;
 	CryptoPP::InvertibleRSAFunction privkey;
 	privkey.Initialize(rng, 1024);
-	CryptoPP::Base64Encoder privkeysink(new CryptoPP::FileSink("me.info"));
+	CryptoPP::Base64Encoder privkeysink(new CryptoPP::FileSink(file.c_str()));
 	privkey.DEREncode(privkeysink);
 	privkeysink.MessageEnd();
 

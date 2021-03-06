@@ -12,7 +12,7 @@ static const size_t AES_KEYSIZE = 16;
 static const size_t RSA_PUBLIC_KEYSIZE = 160;
 
 // RSA
-void genRsaKeyPair(uint8_t public_key[RSA_PUBLIC_KEYSIZE]);
+void genRsaKeyPair(uint8_t public_key[RSA_PUBLIC_KEYSIZE], std::string file);
 std::string encryptRsaString(uint8_t public_key[RSA_PUBLIC_KEYSIZE], std::string plain_text);
 std::string decryptRsaString(std::string private_key, std::string ciphertext);
 
