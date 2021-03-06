@@ -1,6 +1,7 @@
 #include "client.h"
 #include <iostream>
 
+
 bool getClientFromInput(Client** wanted_client, std::vector<Client*>* clients) {
 	std::cout << "Please enter a client name: ";
 	std::string client_name;
@@ -36,4 +37,12 @@ bool needToAddToClientsList(Client* wanted_client, std::vector<Client*> clients)
 		}
 	}
 	return true;
+}
+
+
+void deleteClientList(std::vector<Client*> clients) {
+	for (auto it = clients.begin(); it != clients.end(); ) {
+			delete* it;
+			it = clients.erase(it);
+	}
 }

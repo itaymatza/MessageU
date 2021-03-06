@@ -20,5 +20,5 @@ public:
 
 bool getClientFromInput(Client** wanted_client, std::vector<Client*>* clients);
 bool needToAddToClientsList(Client* wanted_client, std::vector<Client*> clients);
-
+void deleteClientList(std::vector<Client*> clients);
 #endif /* __CLIENT__ */
