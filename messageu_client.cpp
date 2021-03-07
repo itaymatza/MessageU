@@ -31,11 +31,16 @@ int main() {
 
 	getServerInfoFromFile(server_ip, server_port, server_info_file);
 	getClientInfoFromFile(client_name, uid, private_key, client_info_file);
-
 	boost::asio::io_context io_context;
 	tcp::socket sock(io_context);
 	tcp::resolver resolver(io_context);
-	boost::asio::connect(sock, resolver.resolve(*server_ip, *server_port));
+	try {
+		boost::asio::connect(sock, resolver.resolve(*server_ip, *server_port));
+	}
+	catch (...) {
+		cout << "Error: Unable to connect to server." << endl;;
+		exit(-1);
+	}
 
 	bool proceed_to_another_request = true;
 	while (proceed_to_another_request) {
