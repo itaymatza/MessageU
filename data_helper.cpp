@@ -106,7 +106,7 @@ string charArrayToHexString(uint8_t ch[]) {
 
 	for (int i = 0; i < length; i++) {
 		char buffer[3];
-		sprintf_s(buffer, "%02X", ch[i]);
+		sprintf_s(buffer, "%02x", ch[i]);
 		out += buffer;
 	}
 	return out;
