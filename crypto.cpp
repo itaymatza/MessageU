@@ -145,7 +145,7 @@ std::string decryptAesString(uint8_t key[AES_KEYSIZE], std::string ciphertext)
 }
 
 
-// Encrypt file using AES key
+// Encrypt file using AES key, returns the name of the new encrypted file
 std::string encryptAesFile(uint8_t key[AES_KEYSIZE], std::string filename_in) {
 	std::string ciphertext;
 	uint8_t iv[AES_KEYSIZE];
@@ -165,7 +165,7 @@ std::string encryptAesFile(uint8_t key[AES_KEYSIZE], std::string filename_in) {
 	return filename_out;
 }
 
-// Decrypt file using AES key
+// Decrypt file using AES key, returns the name of the new decrypted file 
 std::string decryptAesFile(uint8_t key[AES_KEYSIZE], std::string filename_in) {
 	std::string ciphertext;
 	uint8_t iv[AES_KEYSIZE];
