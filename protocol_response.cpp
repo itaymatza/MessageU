@@ -116,7 +116,7 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 			}
 			catch (...)
 			{
-				cout << "Exception in symmetric decryption!" << endl;
+				cout << "Exception in symmetric decryption." << endl;
 			}
 		}
 		else if (response->payload.message_type == MessageType::TEXT_MESSAGE)
@@ -125,8 +125,8 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 			{
 				vector<char> message(response->payload.message_size);
 				boost::asio::read(sock, boost::asio::buffer(message, response->payload.message_size));
-				if (isDefaultKey(wanted_client->symmetric_key)) {
-					cout << "Can't decrypt message" << endl;
+				if (isDefaultAesKey(wanted_client->symmetric_key)) {
+					cout << "Can't decrypt message." << endl;
 				}
 				else {
 					std::string ciphertext(message.begin(), message.end());
@@ -136,7 +136,7 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 			}
 			catch (...)
 			{
-				cout << "Can't decrypt message" << endl;
+				cout << "Can't decrypt message." << endl;
 			}
 		}
 		else if (response->payload.message_type == MessageType::SEND_FILE)
@@ -144,8 +144,8 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 			try
 			{
 				string filename = writeReceivedPayloadToFile(sock, response->payload.message_size);
-				if (isDefaultKey(wanted_client->symmetric_key) || !createTmpDirectory()) {
-					cout << "Can't decrypt message" << endl;
+				if (isDefaultAesKey(wanted_client->symmetric_key) || !createTmpDirectory()) {
+					cout << "Can't decrypt message." << endl;
 				}
 				else {
 					string decrypted_file = decryptAesFile(wanted_client->symmetric_key, filename);
@@ -155,7 +155,7 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 			}
 			catch (...)
 			{
-				cout << "Exception in file decryption!" << endl;
+				cout << "Exception in file decryption." << endl;
 			}
 		}	
 		cout << "-----<EOM>-----\n" << endl;

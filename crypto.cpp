@@ -93,7 +93,14 @@ std::string decryptRsaString(std::string private_key, std::string ciphertext)
 	return decrypted;
 }
 
+bool isDefaultRsaKey(uint8_t key[RSA_PUBLIC_KEYSIZE]) {
+	char testblock[RSA_PUBLIC_KEYSIZE];
+	memset(testblock, 0, sizeof(testblock));
 
+	if (memcmp(key, testblock, RSA_PUBLIC_KEYSIZE) == 0)
+		return true;
+	return false;
+}
 
 
 // Generates AES symmetric key into 16-byte uint8_t array.
@@ -177,8 +184,7 @@ std::string decryptAesFile(uint8_t key[AES_KEYSIZE], std::string filename_in) {
 	return filename_out;
 }
 
-
-bool isDefaultKey(uint8_t key[AES_KEYSIZE]) {
+bool isDefaultAesKey(uint8_t key[AES_KEYSIZE]) {
 	char testblock[AES_KEYSIZE];
 	memset(testblock, 0, sizeof(testblock));
 

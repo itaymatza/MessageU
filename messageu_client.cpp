@@ -154,13 +154,22 @@ int main() {
 				string message;
 				cout << "Please enter a message:" << endl;
 				getline(cin, message);
-				string ciphertext = encryptAesString(wanted_client->symmetric_key, message);
+				if (isDefaultAesKey(wanted_client->symmetric_key)) {
+					cout << "Can't encrypt message." << endl;
+					break;
+				}
+				try {
+					string ciphertext = encryptAesString(wanted_client->symmetric_key, message);
 
-				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::TEXT_MESSAGE, ciphertext.length());
-				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
-				boost::asio::write(sock, boost::asio::buffer(ciphertext, ciphertext.size()));
-				readServerPushMessageResponse(sock);
-				delete request;
+					PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::TEXT_MESSAGE, ciphertext.length());
+					writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
+					boost::asio::write(sock, boost::asio::buffer(ciphertext, ciphertext.size()));
+					readServerPushMessageResponse(sock);
+					delete request;
+				}
+				catch (...) {
+					cout << "Can't encrypt message." << endl;
+				}
 			}
 			break;
 		}
@@ -173,17 +182,24 @@ int main() {
 				cout << "Please enter a file name: ";
 				string file;
 				getline(std::cin, file);
-				if (!isFileExist(file)) {
-					cout << "file not found" << endl;
+				if (!isFileExist(file))
+					break;
+				if (isDefaultAesKey(wanted_client->symmetric_key)) {
+					cout << "Can't encrypt file." << endl;
 					break;
 				}
-				string encrypted_file = encryptAesFile(wanted_client->symmetric_key, file);
-				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::SEND_FILE, getFileSize(encrypted_file));
-				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
-				writeRequestPayloadFromFile(sock, encrypted_file, getFileSize(encrypted_file));
-				readServerPushMessageResponse(sock);
-				deleteFile(encrypted_file);
-				delete request;
+				try {
+					string encrypted_file = encryptAesFile(wanted_client->symmetric_key, file);
+					PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::SEND_FILE, getFileSize(encrypted_file));
+					writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
+					writeRequestPayloadFromFile(sock, encrypted_file, getFileSize(encrypted_file));
+					readServerPushMessageResponse(sock);
+					deleteFile(encrypted_file);
+					delete request;
+				}
+				catch (...) {
+					cout << "Can't encrypt file." << endl;
+				}
 			}
 			break;
 		}
@@ -208,14 +224,23 @@ int main() {
 
 			if (getClientFromInput(&wanted_client, clients_list))
 			{
-				genAesKey(wanted_client->symmetric_key);
-				string encrypted_symmetric_key = encryptRsaString(wanted_client->public_key, reinterpret_cast<char*>(wanted_client->symmetric_key));
+				if (isDefaultRsaKey(wanted_client->public_key)) {
+					cout << "Can't encrypt symmetric key." << endl;
+					break;
+				}
+				try {
+					genAesKey(wanted_client->symmetric_key);
+					string encrypted_symmetric_key = encryptRsaString(wanted_client->public_key, reinterpret_cast<char*>(wanted_client->symmetric_key));
 
-				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::SYMMETRIC_KEY, encrypted_symmetric_key.size());
-				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
-				boost::asio::write(sock, boost::asio::buffer(encrypted_symmetric_key, encrypted_symmetric_key.size()));
-				readServerPushMessageResponse(sock);
-				delete request;
+					PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::SYMMETRIC_KEY, encrypted_symmetric_key.size());
+					writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));
+					boost::asio::write(sock, boost::asio::buffer(encrypted_symmetric_key, encrypted_symmetric_key.size()));
+					readServerPushMessageResponse(sock);
+					delete request;
+				}
+				catch (...) {
+					cout << "Can't encrypt symmetric key." << endl;
+				}
 			}
 			break;
 		}
