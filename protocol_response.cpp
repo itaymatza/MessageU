@@ -77,6 +77,7 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 	{
 		boost::asio::read(sock, boost::asio::buffer(reinterpret_cast<uint8_t*>(&response->payload), sizeof(PullMessagesResponsePayload)));
 		list_length -= sizeof(PullMessagesResponsePayload);
+		list_length -= response->payload.message_size;
 
 		cout << "From:\t";
 		bool client_in_memory = false;
@@ -124,27 +125,32 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 			{
 				vector<char> message(response->payload.message_size);
 				boost::asio::read(sock, boost::asio::buffer(message, response->payload.message_size));
-				std::string ciphertext(message.begin(), message.end());
-
-				string decrypted = decryptAesString(wanted_client->symmetric_key, ciphertext);
-				cout << decrypted << endl;
+				if (isDefaultKey(wanted_client->symmetric_key)) {
+					cout << "Can't decrypt message" << endl;
+				}
+				else {
+					std::string ciphertext(message.begin(), message.end());
+					string decrypted = decryptAesString(wanted_client->symmetric_key, ciphertext);
+					cout << decrypted << endl;
+				}
 			}
 			catch (...)
 			{
-				cout << "Exception in text message decryption!" << endl;
+				cout << "Can't decrypt message" << endl;
 			}
 		}
 		else if (response->payload.message_type == MessageType::SEND_FILE)
 		{
 			try
 			{
-				if (!createTmpDirectory())
-				{
-					break;
-				}
 				string filename = writeReceivedPayloadToFile(sock, response->payload.message_size);
-				string decrypted_file = decryptAesFile(wanted_client->symmetric_key, filename);
-				cout << "File saved to - " << decrypted_file << endl;
+				if (isDefaultKey(wanted_client->symmetric_key) || !createTmpDirectory()) {
+					cout << "Can't decrypt message" << endl;
+				}
+				else {
+					string decrypted_file = decryptAesFile(wanted_client->symmetric_key, filename);
+					cout << "File saved to - " << decrypted_file << endl;
+				}
 				deleteFile(filename);
 			}
 			catch (...)
@@ -152,7 +158,6 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 				cout << "Exception in file decryption!" << endl;
 			}
 		}	
-		list_length -= response->payload.message_size;
 		cout << "-----<EOM>-----\n" << endl;
 	}
 	return response;

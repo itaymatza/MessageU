@@ -11,6 +11,8 @@
 static const size_t AES_KEYSIZE = 16;
 static const size_t RSA_PUBLIC_KEYSIZE = 160;
 
+bool isDefaultKey(uint8_t key[AES_KEYSIZE]);
+
 // RSA
 void genRsaKeyPair(uint8_t public_key[RSA_PUBLIC_KEYSIZE], std::string file);
 std::string encryptRsaString(uint8_t public_key[RSA_PUBLIC_KEYSIZE], std::string plain_text);

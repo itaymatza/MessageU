@@ -173,8 +173,10 @@ int main() {
 				cout << "Please enter a file name: ";
 				string file;
 				getline(std::cin, file);
-				if (!isFileExist(file))
+				if (!isFileExist(file)) {
+					cout << "file not found" << endl;
 					break;
+				}
 				string encrypted_file = encryptAesFile(wanted_client->symmetric_key, file);
 				PushMessageRequest* request = encodePushMessageRequest(uid, wanted_client->uid, MessageType::SEND_FILE, getFileSize(encrypted_file));
 				writeToServer(sock, reinterpret_cast<uint8_t*>(request), sizeof(PushMessageRequest));

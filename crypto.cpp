@@ -176,3 +176,13 @@ std::string decryptAesFile(uint8_t key[AES_KEYSIZE], std::string filename_in) {
 	out.close();
 	return filename_out;
 }
+
+
+bool isDefaultKey(uint8_t key[AES_KEYSIZE]) {
+	char testblock[AES_KEYSIZE];
+	memset(testblock, 0, sizeof(testblock));
+
+	if (memcmp(key, testblock, AES_KEYSIZE) == 0)
+		return true;
+	return false;
+}
