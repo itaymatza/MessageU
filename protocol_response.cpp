@@ -141,10 +141,12 @@ PullMessagesResponse* readServerPullMessagesResponse(boost::asio::ip::tcp::socke
 		}
 		else if (response->payload.message_type == MessageType::SEND_FILE)
 		{
+			if (!createTmpDirectory())
+				break;
 			try
 			{
 				string filename = writeReceivedPayloadToFile(sock, response->payload.message_size);
-				if (isDefaultAesKey(wanted_client->symmetric_key) || !createTmpDirectory()) {
+				if (isDefaultAesKey(wanted_client->symmetric_key)) {
 					cout << "Can't decrypt message." << endl;
 				}
 				else {
