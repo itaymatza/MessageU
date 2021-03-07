@@ -30,7 +30,7 @@ bool is_number(const std::string& s)
 	If invalid info file format or port number - output stream for errors and exit.
 	Writes the info to ip and port string parameters.
 */
-void getServerInfoFromFile(string* ip, string* port, Status* status, string info_file){
+void getServerInfoFromFile(string* ip, string* port, string info_file){
 
 	ifstream file(info_file);
 	if (file) {
@@ -44,14 +44,14 @@ void getServerInfoFromFile(string* ip, string* port, Status* status, string info
 
 		int port_int = atoi((*port).c_str());
 		if (!is_number(*port) || !is_end_of_file.empty() || port_int < 1 || port_int > 65535) {
-			cerr << "Error: invalid file, the file should contain just valid port number.\n";
-			*status = Status::server_info_error;
+			cout << "Error: invalid file, the file should contain just valid port number." << endl;
+			exit(-1);
 		}
 		file.close();
 	}
 	else {
-		cerr << "Error: Unable to open server.info file.\n";
-		*status = Status::server_info_error;
+		cout << "Error: Unable to open server.info file." << endl;;
+		exit(-1);
 	}
 }
 
@@ -76,14 +76,13 @@ void HexStringTocharArray(string str, uint8_t* uid) {
 	If invalid info file format - output stream for errors and exit.
 	Writes the info to n and port string parameters.
 */
-void getClientInfoFromFile(string* client_name, uint8_t* uid, string* private_key, Status* status, string info_file) {
+void getClientInfoFromFile(string* client_name, uint8_t* uid, string* private_key, string info_file) {
 
 	ifstream file(info_file);
 	if (file) {
 		string name, uidstring, key, buffer;
 		if (!getline(file, name) || !getline(file, uidstring) || !getline(file, key)) {
 			cerr << "Error: Illegal " << info_file << " file.\n";
-			*status = Status::client_info_error;
 		}
 		while (file >> buffer) {
 			key += buffer;
@@ -96,7 +95,6 @@ void getClientInfoFromFile(string* client_name, uint8_t* uid, string* private_ke
 	}
 	else {
 		cerr << "Error: Unable to open " << info_file << " file.\n";
-		*status = Status::client_info_error;
 	}
 }
 
@@ -112,7 +110,7 @@ string charArrayToHexString(uint8_t ch[]) {
 	return out;
 }
 
-void writeMeInfoFile(std::string username, uint8_t uid[16], Status* status) {
+void writeMeInfoFile(std::string username, uint8_t uid[16]) {
 	string buffer, key;
 	ifstream ifile("me.info");
 	while (ifile >> buffer) {
@@ -130,8 +128,7 @@ void writeMeInfoFile(std::string username, uint8_t uid[16], Status* status) {
 		ofile.close();
 	}
 	else {
-		cerr << "Error: Unable to open and write me.info file.\n";
-		*status = Status::client_info_error;
+		cout << "Error: Unable to open and write me.info file.\n";
 	}
 }
 

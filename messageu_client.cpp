@@ -22,7 +22,6 @@ string server_info_file("server.info");
 
 // MessageU-Client Main Function.
 int main() {
-	Status status = Status::proper;
 	uint8_t uid[UID_LEN];
 	string* server_ip = new string();
 	string* server_port = new string();
@@ -30,8 +29,8 @@ int main() {
 	string* private_key = new string();
 	vector<Client*>* clients_list = new vector<Client*>();
 
-	getServerInfoFromFile(server_ip, server_port, &status, server_info_file);
-	getClientInfoFromFile(client_name, uid, private_key, &status, client_info_file);
+	getServerInfoFromFile(server_ip, server_port, server_info_file);
+	getClientInfoFromFile(client_name, uid, private_key, client_info_file);
 
 	boost::asio::io_context io_context;
 	tcp::socket sock(io_context);
@@ -88,9 +87,9 @@ int main() {
 				deleteFile(client_info_file);
 			}
 			else {
-				writeMeInfoFile(username, response->payload.uid, &status);
+				writeMeInfoFile(username, response->payload.uid);
 				cout << "Client registered successfully." << "\n" << endl;
-				getClientInfoFromFile(client_name, uid, private_key, &status, client_info_file);
+				getClientInfoFromFile(client_name, uid, private_key, client_info_file);
 			}
 			delete request;
 			delete response;
